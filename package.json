@@ -1,0 +1,30 @@
+{
+    "name": "oztf-meet-web",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc --noEmit && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@vitejs/plugin-vue-jsx": "^5.0.1",
+        "crypto-js": "^4.2.0",
+        "motion-v": "^1.0.0",
+        "pako": "^2.1.0",
+        "trtc-sdk-v5": "^5.15.0",
+        "vue": "^3.5.13",
+        "vue-router": "^4.5.1"
+    },
+    "devDependencies": {
+        "@types/crypto-js": "^4.2.2",
+        "@types/node": "^24.0.13",
+        "@types/pako": "^2.0.4",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "sass": "^1.89.2",
+        "typescript": "~5.6.2",
+        "vite": "^6.0.3",
+        "vue-tsc": "^2.1.10"
+    }
+}

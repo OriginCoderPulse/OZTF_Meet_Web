@@ -1,0 +1,192 @@
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.info-page {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(37, 37, 37, 0.95);
+    padding: 20px;
+    animation: fadeIn 0.3s ease-out;
+
+    .info-loading {
+        text-align: center;
+        color: #dddddd;
+        font-size: 16px;
+        padding: 20px;
+    }
+
+    .info-mobile-warning {
+        text-align: center;
+        padding: 40px 20px;
+        background-color: rgba(255, 193, 7, 0.1);
+        border: 2px solid rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        margin-top: 20px;
+
+        .warning-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .warning-text {
+            color: #ffc107;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .warning-desc {
+            color: #dddddd;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    }
+
+    .info-topic {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        padding: 12px;
+        background-color: rgba(53, 53, 53, 0.5);
+        border-radius: 8px;
+
+        .label {
+            color: #dddddd;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .value {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+        }
+    }
+
+    .info-container {
+        width: 100%;
+        max-width: 500px;
+        background-color: rgba(37, 37, 37, 0.8);
+        border-radius: 18px;
+        padding: 40px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        animation: fadeIn 0.4s ease-out 0.1s both;
+
+        .info-title {
+            color: #ffffff;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .info-room-id {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: rgba(53, 53, 53, 0.5);
+            border-radius: 8px;
+
+            .label {
+                color: #dddddd;
+                font-size: 14px;
+                margin-right: 10px;
+            }
+
+            .value {
+                color: #ffffff;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        }
+
+        .info-form {
+            .form-item {
+                margin-bottom: 20px;
+
+                .form-label {
+                    display: block;
+                    color: #dddddd;
+                    font-size: 14px;
+                    margin-bottom: 8px;
+                }
+
+                .form-input {
+                    width: 100%;
+                    padding: 12px 16px;
+                    background-color: rgba(53, 53, 53, 0.5);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    color: #ffffff;
+                    font-size: 16px;
+                    outline: none;
+                    transition: all 0.3s ease;
+
+                    &:focus {
+                        border-color: rgba(255, 255, 255, 0.3);
+                        background-color: rgba(53, 53, 53, 0.7);
+                    }
+
+                    &::placeholder {
+                        color: rgba(255, 255, 255, 0.5);
+                    }
+                }
+
+                .form-error {
+                    color: #ff6b6b;
+                    font-size: 12px;
+                    margin-top: 5px;
+
+                    &.form-error-disabled {
+                        color: #ffa500;
+                    }
+                }
+            }
+
+            .join-button {
+                width: 100%;
+                padding: 14px;
+                background-color: #4a9eff;
+                border: none;
+                border-radius: 8px;
+                color: #ffffff;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                &:hover:not(:disabled) {
+                    background-color: #3a8eef;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3);
+                }
+
+                &:active:not(:disabled) {
+                    transform: translateY(0);
+                }
+
+                &.join-button-disabled,
+                &:disabled {
+                    background-color: #666666;
+                    cursor: not-allowed;
+                    opacity: 0.6;
+                }
+            }
+        }
+    }
+}

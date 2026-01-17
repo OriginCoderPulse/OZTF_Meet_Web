@@ -154,5 +154,9 @@ class LibGenerateTestUserSig {
     }
 }
 
-export const libGenerateTestUserSig = new LibGenerateTestUserSig();
-export default libGenerateTestUserSig;
+export default {
+  install(app: any) {
+    app.config.globalProperties.$libGenerateTestUserSig = new LibGenerateTestUserSig();
+    window.$libGenerateTestUserSig = new LibGenerateTestUserSig();
+  },
+};

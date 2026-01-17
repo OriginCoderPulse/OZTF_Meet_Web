@@ -1,28 +1,24 @@
-import { defineComponent } from 'vue';
-
-interface SvgProps {
-    svgPath: string | string[];
-    width?: string | number;
-    height?: string | number;
-    class?: string;
-    fill?: string;
-    viewBox?: string;
-}
+import { defineComponent, PropType } from 'vue';
+import './Svg.scss';
 
 export default defineComponent({
     name: 'Svg',
     props: {
         svgPath: {
-            type: [String, Array] as any,
+            type: [String, Array, Object] as PropType<string | string[] | Array<{ path: string; fill?: string }>>,
             required: true
         },
         width: {
-            type: [String, Number],
-            default: '20'
+            type: [String, Number] as PropType<string | number>,
+            default: '14'
         },
         height: {
-            type: [String, Number],
-            default: '20'
+            type: [String, Number] as PropType<string | number>,
+            default: '14'
+        },
+        viewBox: {
+            type: String,
+            default: '0 0 1024 1024'
         },
         class: {
             type: String,
@@ -30,28 +26,65 @@ export default defineComponent({
         },
         fill: {
             type: String,
-            default: '#ffffff'
+            default: '#999999'
         },
-        viewBox: {
+        stroke: {
             type: String,
-            default: '0 0 1024 1024'
+            default: ''
+        },
+        strokeWidth: {
+            type: [String, Number] as PropType<string | number>,
+            default: ''
+        },
+        strokeLinecap: {
+            type: String,
+            default: ''
         }
     },
-    setup(props: SvgProps) {
-        const paths = Array.isArray(props.svgPath) ? props.svgPath : [props.svgPath];
-
+    setup(props) {
         return () => (
-            <svg
-                width={props.width}
+            <svg 
+                viewBox={props.viewBox} 
+                version="1.1" 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={props.width} 
                 height={props.height}
-                viewBox={props.viewBox}
                 class={props.class}
-                fill={props.fill}
-                xmlns="http://www.w3.org/2000/svg"
             >
-                {paths.map((path, index) => (
-                    <path key={index} d={path} fill={props.fill} />
-                ))}
+                {Array.isArray(props.svgPath) ? props.svgPath.map((item: any, index: number) => {
+                    // 支持对象数组格式 { path: string, fill?: string }
+                    if (typeof item === 'object' && item.path) {
+                        return (
+                            <path 
+                                key={`path-${index}`} 
+                                d={item.path} 
+                                fill={item.fill || props.fill}
+                                stroke={props.stroke || undefined}
+                                strokeWidth={props.strokeWidth || undefined}
+                                strokeLinecap={props.strokeLinecap || undefined}
+                            ></path>
+                        );
+                    }
+                    // 支持字符串数组格式
+                    return (
+                        <path 
+                            key={`path-${index}`} 
+                            d={item as string} 
+                            fill={props.fill}
+                            stroke={props.stroke || undefined}
+                            strokeWidth={props.strokeWidth || undefined}
+                            strokeLinecap={props.strokeLinecap || undefined}
+                        ></path>
+                    );
+                }) : (
+                    <path 
+                        d={props.svgPath as string} 
+                        fill={props.fill}
+                        stroke={props.stroke || undefined}
+                        strokeWidth={props.strokeWidth || undefined}
+                        strokeLinecap={props.strokeLinecap || undefined}
+                    ></path>
+                )}
             </svg>
         );
     }

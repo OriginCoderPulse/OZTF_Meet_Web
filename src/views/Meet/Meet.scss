@@ -1,0 +1,248 @@
+.meet-room {
+  width: 100%;
+  height: 100%;
+  padding: 35px 15px 5px 15px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: rgba($color: #535353, $alpha: 0.35);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  .meet-loading {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .meet-main {
+    flex: 1;
+    display: flex;
+
+    .meet-video {
+      flex: 1;
+      background-color: rgba(37, 37, 37, 0.49);
+      border-radius: 18px;
+      position: relative;
+      overflow: hidden;
+
+      // 确保 TRTC SDK 创建的视频元素铺满容器
+      video,
+      canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 18px;
+        z-index: 1;
+      }
+
+
+
+      .show-participant {
+        z-index: 10;
+        background-color: rgba(37, 37, 37, 1);
+        border-radius: 8px 0 0 8px;
+        box-sizing: border-box;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top: 50%;
+        right: 0;
+        cursor: pointer;
+
+        .motion-show-participant {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    }
+
+    .meet-participant {
+      background-color: rgba(37, 37, 37, 0.49);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+      
+      // 隐藏滚动条但保持滚动功能
+      scrollbar-width: none; // Firefox
+      -ms-overflow-style: none; // IE 和 Edge
+      
+      &::-webkit-scrollbar {
+        display: none; // Chrome, Safari, Opera
+      }
+
+      .meet-participant-video {
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        border-radius: 8px;
+        background-color: #393939;
+        margin-bottom: 10px;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+
+        // 确保 TRTC SDK 创建的视频元素铺满容器，并隐藏播放控件
+        video,
+        canvas {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover !important;
+          position: absolute;
+          top: 0;
+          left: 0;
+          border-radius: 8px;
+
+          // 隐藏播放控件
+          &::-webkit-media-controls {
+            display: none !important;
+          }
+
+          &::-webkit-media-controls-enclosure {
+            display: none !important;
+          }
+        }
+
+        // 视频流兜底UI（当没有视频流时显示）
+        .video-placeholder {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background-color: #393939;
+          z-index: 5;
+          pointer-events: none;
+
+          .placeholder-text {
+            margin-top: 12px;
+            color: #999999;
+            font-size: 14px;
+          }
+        }
+
+        // 参与人名称（左下角）
+        .participant-name {
+          position: absolute;
+          bottom: 8px;
+          left: 8px;
+          background-color: rgba(0, 0, 0, 0.6);
+          color: #ffffff;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+          z-index: 10;
+          pointer-events: none;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  .meet-operator {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .operator-item {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+
+      &:hover:not(.disabled) {
+        background-color: #393939;
+
+        .tooltip {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(-50%) translateY(-12px);
+        }
+      }
+
+      &.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+
+        &:hover {
+          background-color: transparent;
+        }
+      }
+
+      .tooltip {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(0);
+        background-color: rgba(0, 0, 0, 0.85);
+        color: #ffffff;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+
+        &::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border: 5px solid transparent;
+          border-top-color: rgba(0, 0, 0, 0.85);
+        }
+      }
+    }
+
+    .network-status {
+      width: 60px;
+      height: 60px;
+      margin-right: 10px;
+      background-color: rgba(37, 37, 37, 0.49);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    .operator-list {
+      width: 40%;
+      height: 60px;
+      border-radius: 12px;
+      background-color: rgba(37, 37, 37, 0.49);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import InfoPage from '@/views/InfoPage/InfoPage.tsx';
-import MeetRoom from '@/views/MeetRoom/MeetRoom.tsx';
+import MeetRoom from '@/views/Meet/Meet.tsx';
 
 const router = createRouter({
     history: createWebHistory(),

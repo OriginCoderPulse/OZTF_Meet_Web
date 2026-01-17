@@ -1,11 +1,11 @@
 import TRTCSDK, { TRTCEventTypes } from "trtc-sdk-v5";
-import { libGenerateTestUserSig } from "./LibGenerateTestUserSig";
+import { generateRandomId } from "./IdGenerator";
 
 class TRTC {
-    private _sdkAppId: number = 1600122280;
-    private _userId: string = "12345";
+    private _sdkAppId: number = Number(import.meta.env.VITE_TRTC_APP_ID);
+    private _userId: string = "";
     private _userSig: string = "";
-    private _sdkSecretKey: string = "948f12efcbce9604a29648ed4b0d35441f247457501e77b54b410813e1d7aae9";
+    private _sdkSecretKey: string = import.meta.env.VITE_TRTC_SECRET_KEY;
     private _rooms: Map<number, TRTCSDK> = new Map();
     private _initialized: boolean = false;
     private _userInteractionHappened: boolean = false;
@@ -39,18 +39,16 @@ class TRTC {
         return new Promise<void>((resolve) => {
             // 如果传入了新的 userId 且与当前不同，更新 userId 并重新生成 userSig
             if (userId && userId !== this._userId) {
-                console.log('更新 TRTC userId:', this._userId, '->', userId);
                 this._userId = userId;
                 // 如果已经初始化过，需要重新生成 userSig
                 if (this._initialized) {
-                    const result = libGenerateTestUserSig.genTestUserSig(
+                    const result = $libGenerateTestUserSig.genTestUserSig(
                         this._sdkAppId,
                         this._userId,
                         this._sdkSecretKey,
                     );
                     if (result.userSig) {
                         this._userSig = result.userSig;
-                        console.log('已重新生成 userSig for userId:', this._userId);
                     }
                 }
             }
@@ -82,8 +80,12 @@ class TRTC {
      */
     private _doInitialize(userId?: string): Promise<void> {
         return new Promise<void>((resolve) => {
-            const finalUserId = userId || this._userId;
-            const result = libGenerateTestUserSig.genTestUserSig(
+            let finalUserId = userId || this._userId;
+            // 如果 userId 仍然为空，生成一个临时的 userId
+            if (!finalUserId || finalUserId.trim() === '') {
+                finalUserId = generateRandomId();
+            }
+            const result = $libGenerateTestUserSig.genTestUserSig(
                 this._sdkAppId,
                 finalUserId,
                 this._sdkSecretKey,
@@ -117,9 +119,18 @@ class TRTC {
 
         try {
             // 请求音频和视频权限
+            // 在 Windows 上，需要明确的权限请求，使用更详细的配置
             const stream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-                video: true
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                },
+                video: {
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    frameRate: { ideal: 30 }
+                }
             });
 
             // 获取权限状态
@@ -129,12 +140,12 @@ class TRTC {
             const audioGranted = audioTracks.length > 0 && audioTracks[0].readyState === 'live';
             const videoGranted = videoTracks.length > 0 && videoTracks[0].readyState === 'live';
 
-            // 停止流以释放资源
-            stream.getTracks().forEach(track => track.stop());
+            // 不立即停止流，保持权限状态
+            // 注意：这里不停止流，让 TRTC SDK 在需要时使用
+            // 如果后续不需要这个流，可以在 joinRoom 后再处理
 
             return { audio: audioGranted, video: videoGranted };
         } catch (error: any) {
-            console.error("请求媒体权限失败:", error);
             // 如果用户拒绝权限，返回 false
             if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
                 return { audio: false, video: false };
@@ -154,25 +165,20 @@ class TRTC {
 
                 // 如果传入了新的 userId 且与当前不同，更新 userId 并重新生成 userSig
                 if (userId && userId !== this._userId) {
-                    console.log('createTRTC: 更新 userId', this._userId, '->', userId);
                     this._userId = userId;
-                    const result = libGenerateTestUserSig.genTestUserSig(
+                    const result = $libGenerateTestUserSig.genTestUserSig(
                         this._sdkAppId,
                         this._userId,
                         this._sdkSecretKey,
                     );
                     if (result.userSig) {
                         this._userSig = result.userSig;
-                        console.log('createTRTC: 已重新生成 userSig for userId:', this._userId);
-                    } else {
-                        console.error('createTRTC: 重新生成 userSig 失败');
                     }
                 }
 
                 try {
                     const room = TRTCSDK.create();
                     this._rooms.set(roomId, room);
-                    console.log("createRoom", this._rooms, room, "userId:", this._userId);
 
                     // 实际请求权限
                     const permissions = await this.requestMediaPermissions();
@@ -182,7 +188,6 @@ class TRTC {
                         status: true
                     });
                 } catch (error: any) {
-                    console.error("创建TRTC房间失败:", error);
                     resolve({ audio: false, video: false, status: false });
                 }
 
@@ -209,7 +214,6 @@ class TRTC {
 
     exitRoom(roomId: number): Promise<void> {
         const room = this._rooms.get(roomId);
-        console.log("exitRoom", room, this._rooms);
         if (!room) {
             return Promise.reject(new Error(`Room ${roomId} does not exist`));
         }
@@ -224,7 +228,11 @@ class TRTC {
         if (!room) {
             return Promise.reject(new Error(`Room ${roomId} does not exist`));
         }
-        return room.startLocalAudio() as Promise<void>;
+        return room.startLocalAudio({
+            option: {
+                profile: 'high-stereo'
+            }
+        }) as Promise<void>;
     }
 
     closeLocalAudio(roomId: number): Promise<void> {
@@ -294,6 +302,32 @@ class TRTC {
         return room.startRemoteVideo({ userId, streamType: normalizedStreamType as any, view }) as Promise<void>;
     }
 
+    startRemoteScreen(roomId: number): Promise<void> {
+        const room = this._rooms.get(roomId);
+        if (!room) {
+            return Promise.reject(new Error(`Room ${roomId} does not exist`));
+        }
+        return room.startScreenShare({
+            option: {
+                profile: {
+                    width: 1920,
+                    height: 1080,
+                    frameRate: 60,
+                    bitrate: 10000
+                },
+                fillMode: 'cover'
+            }
+        }) as Promise<void>;
+    }
+
+    stopRemoteScreen(roomId: number): Promise<void> {
+        const room = this._rooms.get(roomId);
+        if (!room) {
+            return Promise.reject(new Error(`Room ${roomId} does not exist`));
+        }
+        return room.stopScreenShare() as Promise<void>;
+    }
+
     listenRoomProperties(roomId: number, event: keyof TRTCEventTypes, callback: (event: any, room: TRTCSDK) => void) {
         this._rooms.get(roomId)?.on(event, ((...args: any[]) => {
             callback(args[0], this._rooms.get(roomId) as TRTCSDK);
@@ -306,12 +340,6 @@ class TRTC {
             return Promise.reject(new Error(`Room ${roomId} does not exist`));
         }
         // 确保 userId 和 userSig 匹配
-        console.log('enterRoom 参数:', {
-            sdkAppId: this._sdkAppId,
-            userId: this._userId,
-            userSig: this._userSig ? `${this._userSig.substring(0, 20)}...` : 'empty',
-            roomId
-        });
         return room.enterRoom({
             sdkAppId: this._sdkAppId,
             userId: this._userId,
@@ -321,5 +349,9 @@ class TRTC {
     }
 }
 
-export const trtc = new TRTC();
-export default trtc;
+export default {
+    install(app: any) {
+        app.config.globalProperties.$trtc = new TRTC();
+        window.$trtc = new TRTC();
+    },
+};

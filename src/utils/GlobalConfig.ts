@@ -25,6 +25,12 @@ class GlobalConfig {
       retry: false,
       cache: false,
     },
+    meetGenerateUserSig: {
+      method: "POST",
+      path: ["meet", "generate-usersig"],
+      retry: false,
+      cache: false,
+    },
   };
 }
 

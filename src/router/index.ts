@@ -15,14 +15,19 @@ const router = createRouter({
       path: "/:roomId/meet",
       name: "MeetRoom",
       component: MeetRoom,
-      beforeEnter: (_to, _from, next) => {
+      beforeEnter: async (_to, _from, next) => {
         // 路由鉴权：检查是否有 meeting-status 本地存储
-        const meetingStatus = localStorage.getItem("meeting-status");
-        if (meetingStatus === "success") {
-          // 有权限，允许进入
-          next();
-        } else {
-          // 没有权限，跳转到错误页面
+        try {
+          const meetingStatus = await $storage.get("meeting-status");
+          if (meetingStatus === "success") {
+            // 有权限，允许进入
+            next();
+          } else {
+            // 没有权限，跳转到错误页面
+            next("/error");
+          }
+        } catch (error) {
+          // 获取存储失败，跳转到错误页面
           next("/error");
         }
       },

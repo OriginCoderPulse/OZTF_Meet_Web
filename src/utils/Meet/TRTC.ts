@@ -5,7 +5,6 @@ class TRTC {
   private _sdkAppId: number = Number(import.meta.env.VITE_TRTC_APP_ID);
   private _userId: string = "";
   private _userSig: string = "";
-  private _sdkSecretKey: string = import.meta.env.VITE_TRTC_SECRET_KEY;
   private _rooms: Map<number, TRTCSDK> = new Map();
   private _initialized: boolean = false;
   private _userInteractionHappened: boolean = false;
@@ -33,23 +32,19 @@ class TRTC {
 
   /**
    * 懒加载初始化，只在第一次使用时调用
-   * 如果传入了新的 userId，会更新内部 userId 并重新生成 userSig
+   * 如果传入了新的 userId，会更新内部 userId 并重新获取 userSig
    */
   private ensureInitialized(userId?: string) {
-    return new Promise<void>((resolve) => {
-      // 如果传入了新的 userId 且与当前不同，更新 userId 并重新生成 userSig
+    return new Promise<void>((resolve, reject) => {
+      // 如果传入了新的 userId 且与当前不同，更新 userId 并重新获取 userSig
       if (userId && userId !== this._userId) {
         this._userId = userId;
-        // 如果已经初始化过，需要重新生成 userSig
+        // 如果已经初始化过，需要重新获取 userSig
         if (this._initialized) {
-          const result = $libGenerateTestUserSig.genTestUserSig(
-            this._sdkAppId,
-            this._userId,
-            this._sdkSecretKey
-          );
-          if (result.userSig) {
-            this._userSig = result.userSig;
-          }
+          this._fetchUserSigFromBackend(userId)
+            .then(() => resolve())
+            .catch(reject);
+          return;
         }
       }
 
@@ -62,7 +57,7 @@ class TRTC {
       if (!this._userInteractionHappened) {
         const checkInteraction = () => {
           if (this._userInteractionHappened) {
-            this._doInitialize(userId).then(resolve);
+            this._doInitialize(userId).then(resolve).catch(reject);
           } else {
             setTimeout(checkInteraction, 100);
           }
@@ -71,7 +66,7 @@ class TRTC {
         return;
       }
 
-      this._doInitialize(userId).then(resolve);
+      this._doInitialize(userId).then(resolve).catch(reject);
     });
   }
 
@@ -79,22 +74,47 @@ class TRTC {
    * 执行初始化
    */
   private _doInitialize(userId?: string): Promise<void> {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
       let finalUserId = userId || this._userId;
       // 如果 userId 仍然为空，生成一个临时的 userId
       if (!finalUserId || finalUserId.trim() === "") {
         finalUserId = generateRandomId();
       }
-      const result = $libGenerateTestUserSig.genTestUserSig(
-        this._sdkAppId,
-        finalUserId,
-        this._sdkSecretKey
-      );
-      if (result.sdkAppId) this._sdkAppId = result.sdkAppId;
-      if (result.userSig) this._userSig = result.userSig;
       this._userId = finalUserId;
-      this._initialized = true;
-      resolve();
+
+      // 从后端获取 UserSig
+      this._fetchUserSigFromBackend(finalUserId)
+        .then(() => {
+          this._initialized = true;
+          resolve();
+        })
+        .catch(reject);
+    });
+  }
+
+  /**
+   * 从后端获取 UserSig（必须成功，失败则不允许进入房间）
+   */
+  private _fetchUserSigFromBackend(userId: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      $network.request(
+        "meetGenerateUserSig",
+        { userId },
+        (data: any) => {
+          if (data.sdkAppId) {
+            this._sdkAppId = data.sdkAppId;
+          }
+          if (data.userSig) {
+            this._userSig = data.userSig;
+            resolve();
+          } else {
+            reject(new Error("后端返回的 UserSig 为空，无法进入房间"));
+          }
+        },
+        (error: any) => {
+          reject(new Error(`无法从后端获取 UserSig，无法进入房间: ${error}`));
+        }
+      );
     });
   }
 
@@ -167,16 +187,15 @@ class TRTC {
             return;
           }
 
-          // 如果传入了新的 userId 且与当前不同，更新 userId 并重新生成 userSig
+          // 如果传入了新的 userId 且与当前不同，更新 userId 并重新获取 userSig
           if (userId && userId !== this._userId) {
             this._userId = userId;
-            const result = $libGenerateTestUserSig.genTestUserSig(
-              this._sdkAppId,
-              this._userId,
-              this._sdkSecretKey
-            );
-            if (result.userSig) {
-              this._userSig = result.userSig;
+            // 从后端获取新的 UserSig
+            try {
+              await this._fetchUserSigFromBackend(userId);
+            } catch (error) {
+              reject(new Error("Failed to get UserSig from backend"));
+              return;
             }
           }
 

@@ -123,7 +123,11 @@ export class InfoPageController {
     (window as any).__tempNickname = this.nickname.value.trim();
 
     // 添加本地存储，标记已通过正常流程进入会议室
-    localStorage.setItem("meeting-status", "success");
+    try {
+      await $storage.set("meeting-status", "success");
+    } catch (error) {
+      // 静默处理错误
+    }
 
     if (this.router) {
       this.router.push({

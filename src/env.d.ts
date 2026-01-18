@@ -123,6 +123,12 @@ declare global {
     roomIdToNumber: (roomId: string | number) => number;
     numberToRoomId: (numericRoomId: number) => string;
   };
+  var $storage: {
+    get: (key: string) => Promise<string>;
+    set: (key: string, value: any) => Promise<void>;
+    remove: (key: string) => Promise<void>;
+    clearAll: () => Promise<void>;
+  };
   var $config: {
     urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
   };

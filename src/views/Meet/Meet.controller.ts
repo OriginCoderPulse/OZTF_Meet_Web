@@ -475,9 +475,9 @@ export class MeetRoomController {
 
     // 保存 trtcId 以便退出时使用
     this._trtcId.value = trtcId;
-    // 保存到 localStorage，用于刷新时删除旧的参会人记录
+    // 保存到本地存储，用于刷新时删除旧的参会人记录
     try {
-      localStorage.setItem(`meet_trtcId_${meetId}`, trtcId);
+      await $storage.set(`meet_trtcId_${meetId}`, trtcId);
     } catch (error) {
       // 静默处理错误
     }
@@ -532,13 +532,17 @@ export class MeetRoomController {
 
     $trtc
       .exitRoom(roomId)
-      .then(() => {
+      .then(async () => {
         // 删除本地存储，退出会议时清除
-        localStorage.removeItem("meeting-status");
+        try {
+          await $storage.remove("meeting-status");
+        } catch (error) {
+          // 静默处理错误
+        }
         // 清除保存的 trtcId
         if (this._meetId.value) {
           try {
-            localStorage.removeItem(`meet_trtcId_${this._meetId.value}`);
+            await $storage.remove(`meet_trtcId_${this._meetId.value}`);
           } catch (error) {
             // 静默处理错误
           }
@@ -578,7 +582,7 @@ export class MeetRoomController {
   /**
    * 执行退出流程（用于页面关闭前）
    */
-  public handlePageUnload() {
+  public async handlePageUnload() {
     // 删除外部参会人（使用 fetch keepalive 确保请求能发送）
     if (this._meetId.value && this._trtcId.value) {
       try {
@@ -617,10 +621,10 @@ export class MeetRoomController {
 
     // 删除本地存储
     try {
-      localStorage.removeItem("meeting-status");
+      await $storage.remove("meeting-status");
       // 清除保存的 trtcId
       if (this._meetId.value) {
-        localStorage.removeItem(`meet_trtcId_${this._meetId.value}`);
+        await $storage.remove(`meet_trtcId_${this._meetId.value}`);
       }
     } catch (error) {
       // 静默处理错误

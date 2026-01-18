@@ -5,6 +5,7 @@ import GlobalConfig from "./utils/GlobalConfig";
 import Message from "./utils/Message";
 import Popup from "./utils/Popup";
 import Network from "./utils/Network";
+import Storage from "./utils/Storage";
 import TRTC from "./utils/Meet/TRTC";
 import LibGenerateTestUserSig from "./utils/Meet/LibGenerateTestUserSig";
 import RoomFormat from "./utils/Meet/RoomFormat";
@@ -115,6 +116,7 @@ app
   .use(Message)
   .use(Popup)
   .use(Network)
+  .use(Storage)
   .use(LibGenerateTestUserSig)
   .use(TRTC)
   .use(RoomFormat)

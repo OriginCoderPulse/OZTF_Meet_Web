@@ -151,10 +151,11 @@ export default defineComponent({
             >
               <div class="meet-participant-list">
                 {controller.participantList.value.map((participant) => {
-                  const videoState = controller.getParticipantVideoState(participant.participantId);
+                  // 使用 trtcId 作为视频流标识
+                  const videoState = controller.getParticipantVideoState(participant.trtcId);
                   return (
                     <div
-                      id={`${participant.participantId}_remote_video`}
+                      id={`${participant.trtcId}_remote_video`}
                       class="meet-participant-video"
                     >
                       {!videoState && (

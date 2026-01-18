@@ -191,7 +191,7 @@ export default defineComponent({
                   class="exit-button-pc"
                   onClick={() => controller.handleExit()}
                 >
-                  退出会议
+                  退出
                 </button>
               </div>
             )}

@@ -6,7 +6,6 @@ interface PopupInstance {
   app: any;
   vm: HTMLDivElement;
   level: number;
-  finish?: Function;
 }
 
 class PopupManager {
@@ -64,7 +63,7 @@ class PopupManager {
     );
     app.mount(vm);
 
-    this.popupInstances.value.push({ id, app, vm, level, finish: options?.onBtnLeft });
+    this.popupInstances.value.push({ id, app, vm, level });
   }
 
   private _listenEscSpace() {
@@ -74,9 +73,6 @@ class PopupManager {
           this.popupInstances.value[this.popupInstances.value.length - 1];
         if (last) {
           this.close(last.id);
-          if (last.finish) {
-            last.finish();
-          }
         }
       }
     });

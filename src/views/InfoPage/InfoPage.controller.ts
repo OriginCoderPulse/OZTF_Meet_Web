@@ -125,6 +125,9 @@ export class InfoPageController {
     // 将昵称保存到 window 对象上，Meet 页面读取后立即清除
     (window as any).__tempNickname = this.nickname.value.trim();
     
+    // 添加本地存储，标记已通过正常流程进入会议室
+    localStorage.setItem('meeting-status', 'success');
+    
     if (this.router) {
       this.router.push({
         path: `/${roomId}/meet`

@@ -19,6 +19,41 @@ export default defineComponent({
     controller.setRouter(router);
     let meetId: string = "";
 
+    // 使用标记来区分刷新和关闭
+    let isRefreshing = false;
+    
+    // 监听页面显示事件，检测是否是刷新后的恢复
+    const handlePageShow = (event: PageTransitionEvent) => {
+      // 如果是从缓存恢复（刷新），设置标记
+      if (event.persisted) {
+        isRefreshing = true;
+      }
+    };
+    
+    // 监听按键事件，检测刷新快捷键
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // F5 或 Ctrl+R / Cmd+R 表示刷新
+      if (event.key === 'F5' || 
+          (event.key === 'r' && (event.ctrlKey || event.metaKey))) {
+        isRefreshing = true;
+      }
+    };
+    
+    // 页面关闭前执行退出流程（不包括刷新）
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      // 如果不是刷新，才执行退出流程
+      if (!isRefreshing) {
+        // 执行退出流程
+        controller.handlePageUnload();
+        // 注意：现代浏览器可能不会显示自定义消息
+        event.preventDefault();
+        event.returnValue = '';
+      } else {
+        // 如果是刷新，重置标记
+        isRefreshing = false;
+      }
+    };
+
     onMounted(() => {
       const roomId = route.params.roomId as string;
       if (roomId) {
@@ -32,9 +67,21 @@ export default defineComponent({
           });
         }
       }
+
+      // 监听页面显示事件（用于检测刷新）
+      window.addEventListener('pageshow', handlePageShow);
+      // 监听按键事件（用于检测刷新快捷键）
+      window.addEventListener('keydown', handleKeyDown);
+      // 监听页面关闭事件
+      window.addEventListener('beforeunload', handleBeforeUnload);
     });
 
     onUnmounted(() => {
+      // 移除所有事件监听
+      window.removeEventListener('pageshow', handlePageShow);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      
       // 组件卸载时，尝试删除内部参与人
       if (meetId) {
         controller.cleanup(meetId).catch(() => {
@@ -95,37 +142,37 @@ export default defineComponent({
             </div>
           </div>
           <Motion
-            initial={{ width: 0, height: "100%", marginLeft: 0 }}
+            initial={{ width: 0, marginLeft: 0 }}
             animate={{
               width: controller.showParticipant.value ? "20%" : 0,
-              height: "100%",
               marginLeft: controller.showParticipant.value ? 15 : 0,
               padding: controller.showParticipant.value ? 10 : 0
             }}
-            exit={{ width: 0, height: "100%", marginLeft: 0 }}
+            exit={{ width: 0, marginLeft: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             class="meet-participant"
           >
-
-            {controller.participantList.value.map(participant => {
-                const videoState = controller.getParticipantVideoState(participant.participantId);
-                return (
-                  <div id={`${participant.participantId}_remote_video`} class="meet-participant-video">
-                    {!videoState && (
-                      <div class="video-placeholder">
-                        <Svg
-                          svgPath="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z m-32-196h64v-64h-64v64z m0-128h64V320h-64v320z"
-                          width="48"
-                          height="48"
-                          fill="#999999"
-                        />
-                        <span class="placeholder-text">摄像头已关闭</span>
-                      </div>
-                    )}
-                    <div class="participant-name">{participant.name}</div>
-                  </div>
-                );
-              })}
+            <div class="meet-participant-list">
+              {controller.participantList.value.map(participant => {
+                  const videoState = controller.getParticipantVideoState(participant.participantId);
+                  return (
+                    <div id={`${participant.participantId}_remote_video`} class="meet-participant-video">
+                      {!videoState && (
+                        <div class="video-placeholder">
+                          <Svg
+                            svgPath="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64z m0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z m-32-196h64v-64h-64v64z m0-128h64V320h-64v320z"
+                            width="48"
+                            height="48"
+                            fill="#999999"
+                          />
+                          <span class="placeholder-text">摄像头已关闭</span>
+                        </div>
+                      )}
+                      <div class="participant-name">{participant.name}</div>
+                    </div>
+                  );
+                })}
+            </div>
           </Motion>
         </div>
         <div class="meet-operator">

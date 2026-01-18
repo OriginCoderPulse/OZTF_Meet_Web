@@ -1,0 +1,38 @@
+.error-page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba($color: #535353, $alpha: 0.35);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  .error-content {
+    text-align: center;
+    padding: 40px;
+    background-color: rgba(37, 37, 37, 0.49);
+    border-radius: 18px;
+    max-width: 500px;
+
+    .error-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .error-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #d1cdcd;
+      margin-bottom: 16px;
+    }
+
+    .error-message {
+      font-size: 16px;
+      color: #a0a0a0;
+      line-height: 1.6;
+    }
+  }
+}

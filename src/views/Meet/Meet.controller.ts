@@ -531,6 +531,9 @@ export class MeetRoomController {
     }
 
     $trtc.exitRoom(roomId).then(() => {
+      // 删除本地存储，退出会议时清除
+      localStorage.removeItem('meeting-status');
+      
       // Web端退出会议：返回上一页
       if (this.router) {
         this.router.go(-1);
@@ -560,6 +563,54 @@ export class MeetRoomController {
    */
   public getParticipantVideoState(participantId: string): boolean {
     return this._participantVideoStates.value.get(participantId) ?? false;
+  }
+
+  /**
+   * 执行退出流程（用于页面关闭前）
+   */
+  public handlePageUnload() {
+    // 删除外部参会人（使用 fetch keepalive 确保请求能发送）
+    if (this._meetId.value && this._participantId.value) {
+      try {
+        const urlConfig = (window as any).$config?.urls?.meetRemoveOutParticipant;
+        if (urlConfig) {
+          const baseURL = import.meta.env.VITE_API_BASE_URL || '';
+          const url = `${baseURL}/${urlConfig.path.join('/')}`;
+          // 使用 fetch 的 keepalive 选项，确保请求在页面关闭后也能发送
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              meetId: this._meetId.value,
+              participantId: this._participantId.value
+            }),
+            keepalive: true // 关键：即使页面关闭也会发送请求
+          }).catch(() => {
+            // 静默处理错误
+          });
+        }
+      } catch (error) {
+        // 静默处理错误
+      }
+    }
+
+    // 退出 TRTC 房间
+    if (this._roomId.value) {
+      try {
+        $trtc.exitRoom(this._roomId.value).catch(() => {});
+      } catch (error) {
+        // 静默处理错误
+      }
+    }
+
+    // 删除本地存储
+    try {
+      localStorage.removeItem('meeting-status');
+    } catch (error) {
+      // 静默处理错误
+    }
   }
 
   /**

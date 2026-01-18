@@ -44,8 +44,6 @@
         z-index: 1;
       }
 
-
-
       .show-participant {
         z-index: 10;
         background-color: rgba(37, 37, 37, 1);
@@ -74,7 +72,6 @@
       display: flex;
       flex-direction: column;
       box-sizing: border-box;
-      
 
       .meet-participant-list {
         height: 100%;
@@ -84,7 +81,7 @@
 
         scrollbar-width: none; // Firefox
         -ms-overflow-style: none; // IE 和 Edge
-        
+
         &::-webkit-scrollbar {
           display: none; // Chrome, Safari, Opera
         }
@@ -98,7 +95,7 @@
           position: relative;
           overflow: hidden;
           flex-shrink: 0;
-  
+
           // 确保 TRTC SDK 创建的视频元素铺满容器，并隐藏播放控件
           video,
           canvas {
@@ -109,17 +106,17 @@
             top: 0;
             left: 0;
             border-radius: 8px;
-  
+
             // 隐藏播放控件
             &::-webkit-media-controls {
               display: none !important;
             }
-  
+
             &::-webkit-media-controls-enclosure {
               display: none !important;
             }
           }
-  
+
           // 视频流兜底UI（当没有视频流时显示）
           .video-placeholder {
             position: absolute;
@@ -134,14 +131,14 @@
             background-color: #393939;
             z-index: 5;
             pointer-events: none;
-  
+
             .placeholder-text {
               margin-top: 12px;
               color: #999999;
               font-size: 14px;
             }
           }
-  
+
           // 参与人名称（左下角）
           .participant-name {
             position: absolute;
@@ -155,7 +152,7 @@
             z-index: 10;
             pointer-events: none;
           }
-  
+
           &:last-child {
             margin-bottom: 0;
           }
@@ -219,7 +216,7 @@
         z-index: 1000;
 
         &::after {
-          content: '';
+          content: "";
           position: absolute;
           top: 100%;
           left: 50%;

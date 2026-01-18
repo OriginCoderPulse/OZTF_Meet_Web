@@ -13,9 +13,9 @@ class GlobalConfig {
       retry: false,
       cache: false,
     },
-    meetGetParticipants: {
+    meetGetRoomProperties: {
       method: "POST",
-      path: ["meet", "get-meeting-participants"],
+      path: ["meet", "get-room-properties"],
       retry: false,
       cache: false,
     },

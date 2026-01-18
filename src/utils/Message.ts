@@ -14,7 +14,7 @@ class MessageManager {
   private showMessage(
     message: string,
     messageType: "Info" | "Error" | "Warn" | "Success",
-    duration?: number,
+    duration?: number
   ) {
     if (this.messageInstance.value || this.messageTimer.value) {
       clearTimeout(this.messageTimer.value);

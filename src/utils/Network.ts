@@ -23,7 +23,7 @@ class Network {
         },
         (error) => {
           Promise.reject().then(error);
-        },
+        }
       );
 
       this._instance.interceptors.response.use((response) => {
@@ -40,7 +40,7 @@ class Network {
     urlKey: string,
     params: Object = {},
     successCallback?: (data: any) => void,
-    failCallback?: (error: any) => void,
+    failCallback?: (error: any) => void
   ) {
     if (!this._isRequestReady) {
       return failCallback?.("Request Plugin Is Not Installed !");

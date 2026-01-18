@@ -7,7 +7,7 @@ function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // 转换为 32 位整数
   }
   return Math.abs(hash);
@@ -21,7 +21,7 @@ class RoomFormat {
    * @returns 数字类型的 roomId（在有效范围内）
    */
   roomIdToNumber(roomId: string | number): number {
-    if (typeof roomId === 'number') {
+    if (typeof roomId === "number") {
       // 验证数字是否在有效范围内
       if (roomId < 1 || roomId > 4294967294) {
         throw new Error(`Invalid roomId: ${roomId} is out of range [1, 4294967294]`);
@@ -29,16 +29,18 @@ class RoomFormat {
       return Math.floor(roomId); // 确保是整数
     }
 
-    if (!roomId || typeof roomId !== 'string') {
-      throw new Error('Invalid roomId: must be a string or number');
+    if (!roomId || typeof roomId !== "string") {
+      throw new Error("Invalid roomId: must be a string or number");
     }
 
     // 移除所有横线
-    const cleanRoomId = roomId.replace(/-/g, '');
+    const cleanRoomId = roomId.replace(/-/g, "");
 
     // 验证格式（应该是 11 位数字）
     if (!/^\d{11}$/.test(cleanRoomId)) {
-      throw new Error(`Invalid roomId format: ${roomId}. Expected format: xxx-xxxx-xxxx (11 digits)`);
+      throw new Error(
+        `Invalid roomId format: ${roomId}. Expected format: xxx-xxxx-xxxx (11 digits)`
+      );
     }
 
     // 直接转换为数字可能会超出范围，使用哈希函数映射到有效范围
@@ -61,7 +63,7 @@ class RoomFormat {
     const str = numericRoomId.toString();
 
     // 如果长度不足，前面补0
-    const padded = str.padStart(11, '0');
+    const padded = str.padStart(11, "0");
 
     // 格式化为 xxx-xxxx-xxxx
     return `${padded.slice(0, 3)}-${padded.slice(3, 7)}-${padded.slice(7, 11)}`;

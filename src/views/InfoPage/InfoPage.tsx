@@ -1,13 +1,13 @@
 /// <reference path="./InfoPage.d.ts" />
 
-import { defineComponent, onMounted, onUnmounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import './InfoPage.scss';
-import { InfoPageController } from './InfoPage.controller.ts';
-import { infoPageConfig } from './InfoPage.config.ts';
+import { defineComponent, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import "./InfoPage.scss";
+import { InfoPageController } from "./InfoPage.controller.ts";
+import { infoPageConfig } from "./InfoPage.config.ts";
 
 export default defineComponent({
-  name: 'InfoPage',
+  name: "InfoPage",
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -32,21 +32,21 @@ export default defineComponent({
       if (loading.value || joining.value) {
         return (
           <div class="info-page">
-              <div class="info-loading">
-                <div class="spinner-container">
+            <div class="info-loading">
+              <div class="spinner-container">
+                <div class="spinner">
                   <div class="spinner">
                     <div class="spinner">
                       <div class="spinner">
                         <div class="spinner">
-                          <div class="spinner">
-                            <div class="spinner"></div>
-                          </div>
+                          <div class="spinner"></div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
           </div>
         );
       }
@@ -59,7 +59,7 @@ export default defineComponent({
               <h1 class="info-title-pc">会议室信息</h1>
               <div class="info-error-container">
                 <div class="error-icon">⚠️</div>
-                <div class="error-text">{error.value || '会议不存在'}</div>
+                <div class="error-text">{error.value || "会议不存在"}</div>
               </div>
             </div>
           </div>
@@ -67,8 +67,8 @@ export default defineComponent({
       }
 
       const meeting = meetingInfo.value;
-      const isPending = meeting.status === 'Pending';
-      const isInProgress = meeting.status === 'InProgress';
+      const isPending = meeting.status === "Pending";
+      const isInProgress = meeting.status === "InProgress";
 
       // 移动端显示
       if (isMobile.value) {
@@ -163,22 +163,17 @@ export default defineComponent({
                     value={nickname.value}
                     onInput={(e: any) => {
                       nickname.value = e.target.value;
-                      error.value = '';
+                      error.value = "";
                     }}
                     onKeyup={(e: KeyboardEvent) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         controller.handleJoin(roomId);
                       }
                     }}
                   />
-                  {error.value && (
-                    <div class="form-error-pc">{error.value}</div>
-                  )}
+                  {error.value && <div class="form-error-pc">{error.value}</div>}
                 </div>
-                <button
-                  class="join-button-pc"
-                  onClick={() => controller.handleJoin(roomId)}
-                >
+                <button class="join-button-pc" onClick={() => controller.handleJoin(roomId)}>
                   进入会议室
                 </button>
               </div>
@@ -187,10 +182,7 @@ export default defineComponent({
             {/* 退出会议按钮 - 只在非进行中状态显示 */}
             {!isInProgress && (
               <div class="info-exit-button-container">
-                <button
-                  class="exit-button-pc"
-                  onClick={() => controller.handleExit()}
-                >
+                <button class="exit-button-pc" onClick={() => controller.handleExit()}>
                   退出
                 </button>
               </div>

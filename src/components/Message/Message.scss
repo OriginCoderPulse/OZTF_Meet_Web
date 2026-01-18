@@ -1,31 +1,31 @@
 .message-container {
-    position: fixed;
-    inset: 50px 0 0 50%;
-    margin-left: -120px;
-    width: 300px;
-    max-width: 300px;
-    height: 45px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    box-sizing: border-box;
-    z-index: 99999;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  position: fixed;
+  inset: 50px 0 0 50%;
+  margin-left: -120px;
+  width: 300px;
+  max-width: 300px;
+  height: 45px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
+  z-index: 99999;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 
-    svg {
-        margin-right: 15px;
-    }
+  svg {
+    margin-right: 15px;
+  }
 
-    span {
-        flex: 1;
-        display: inline-block;
-        max-width: 100%;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+  span {
+    flex: 1;
+    display: inline-block;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

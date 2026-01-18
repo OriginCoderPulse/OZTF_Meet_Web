@@ -4,7 +4,7 @@ interface MeetingInfo {
   meetId: string;
   topic: string;
   description?: string;
-  status: 'Pending' | 'InProgress' | 'Cancelled' | 'Concluded';
+  status: "Pending" | "InProgress" | "Cancelled" | "Concluded";
   startTime: string;
   duration: number;
   organizerId?: string;

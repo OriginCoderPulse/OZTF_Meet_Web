@@ -27,7 +27,7 @@ class PopupManager {
       onBtnOnly?: Function;
       onBtnLeft?: Function;
       onBtnRight?: Function;
-    },
+    }
   ): void {
     const id: string = `alert_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
     const level: number = ++this.currentLevel;
@@ -59,7 +59,7 @@ class PopupManager {
           options?.onBtnOnly?.();
           that.close(id);
         },
-      }),
+      })
     );
     app.mount(vm);
 
@@ -69,8 +69,7 @@ class PopupManager {
   private _listenEscSpace() {
     window.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key === "Escape" && this.popupInstances.value.length > 0) {
-        const last =
-          this.popupInstances.value[this.popupInstances.value.length - 1];
+        const last = this.popupInstances.value[this.popupInstances.value.length - 1];
         if (last) {
           this.close(last.id);
         }

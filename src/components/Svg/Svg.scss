@@ -1,15 +1,15 @@
 // Svg组件通用样式
 svg {
   display: block;
-  
+
   &.icon {
     cursor: pointer;
-    
+
     &:hover {
       opacity: 0.8;
     }
   }
-  
+
   path {
     transition: fill 0.2s ease;
   }

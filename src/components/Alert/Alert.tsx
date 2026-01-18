@@ -85,10 +85,7 @@ export default defineComponent({
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       class="motion-btn"
                     >
-                      <div
-                        class="cancel"
-                        onClick={() => props.onBtnLeft && props.onBtnLeft()}
-                      >
+                      <div class="cancel" onClick={() => props.onBtnLeft && props.onBtnLeft()}>
                         {props.btnLeftText}
                       </div>
                     </Motion>
@@ -100,12 +97,9 @@ export default defineComponent({
                       exit={{ y: 0 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                       class="motion-btn"
-                      style={!props.onBtnLeft ? { width: '60%' } : {}}
+                      style={!props.onBtnLeft ? { width: "60%" } : {}}
                     >
-                      <div
-                        class="confirm"
-                        onClick={() => props.onBtnRight && props.onBtnRight()}
-                      >
+                      <div class="confirm" onClick={() => props.onBtnRight && props.onBtnRight()}>
                         {props.btnRightText}
                       </div>
                     </Motion>
@@ -118,12 +112,9 @@ export default defineComponent({
                   exit={{ y: 0 }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   class="motion-btn"
-                  style={{ width: '60%' }}
+                  style={{ width: "60%" }}
                 >
-                  <div
-                    class="confirm"
-                    onClick={() => props.onBtnOnly && props.onBtnOnly()}
-                  >
+                  <div class="confirm" onClick={() => props.onBtnOnly && props.onBtnOnly()}>
                     {props.btnOnlyText}
                   </div>
                 </Motion>

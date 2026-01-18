@@ -19,14 +19,18 @@ export default defineComponent({
     controller.setRouter(router);
     let meetId: string = "";
 
-    // 使用标记来区分刷新和关闭
-    let isRefreshing = false;
+    // 使用 sessionStorage 来区分刷新和关闭（更可靠）
+    const REFRESH_FLAG_KEY = "meet_is_refreshing";
 
     // 监听页面显示事件，检测是否是刷新后的恢复
     const handlePageShow = (event: PageTransitionEvent) => {
-      // 如果是从缓存恢复（刷新），设置标记
+      // 如果是从缓存恢复（刷新），清除标志
       if (event.persisted) {
-        isRefreshing = true;
+        try {
+          sessionStorage.removeItem(REFRESH_FLAG_KEY);
+        } catch (error) {
+          // 静默处理错误
+        }
       }
     };
 
@@ -34,23 +38,43 @@ export default defineComponent({
     const handleKeyDown = (event: KeyboardEvent) => {
       // F5 或 Ctrl+R / Cmd+R 表示刷新
       if (event.key === "F5" || (event.key === "r" && (event.ctrlKey || event.metaKey))) {
-        isRefreshing = true;
+        // 在 sessionStorage 中设置刷新标志
+        try {
+          sessionStorage.setItem(REFRESH_FLAG_KEY, "true");
+        } catch (error) {
+          // 静默处理错误
+        }
       }
     };
 
     // 页面关闭前执行退出流程
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      // 检查是否是刷新（通过 sessionStorage）
+      let isRefreshing = false;
+      try {
+        isRefreshing = sessionStorage.getItem(REFRESH_FLAG_KEY) === "true";
+      } catch (error) {
+        // 静默处理错误
+      }
+
       if (!isRefreshing) {
         // 不是刷新：执行完整的退出流程（删除参会人 + 退出 TRTC 房间）
         controller.handlePageUnload();
-        // 注意：现代浏览器可能不会显示自定义消息
+        // 显示确认对话框（只允许离开页面）
+        // 注意：现代浏览器会显示自己的确认对话框，无法自定义按钮文本
         event.preventDefault();
         event.returnValue = "";
       } else {
         // 如果是刷新：只删除参会人，不退出 TRTC 房间（因为页面会重新加载）
         controller.handlePageRefresh();
-        // 重置标记
-        isRefreshing = false;
+        // 刷新时不显示弹框，直接允许刷新
+        // 不调用 preventDefault()，这样就不会显示确认对话框
+        // 清除刷新标志
+        try {
+          sessionStorage.removeItem(REFRESH_FLAG_KEY);
+        } catch (error) {
+          // 静默处理错误
+        }
       }
     };
 

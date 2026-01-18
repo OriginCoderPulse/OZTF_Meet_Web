@@ -8,13 +8,14 @@ import Network from "./utils/Network";
 import TRTC from "./utils/Meet/TRTC";
 import LibGenerateTestUserSig from "./utils/Meet/LibGenerateTestUserSig";
 import RoomFormat from "./utils/Meet/RoomFormat";
+import IconPath from "./utils/IconPath";
 
 // 根据环境变量控制是否允许打开控制台
 // 如果 VITE_INSPECTOR 不为 'true'，则禁用控制台（生产环境和开发环境都生效）
 const isInspectorEnabled = import.meta.env.VITE_INSPECTOR === "true";
 if (!isInspectorEnabled) {
   // 禁用控制台
-  const noop = () => {};
+  const noop = () => { };
   const methods = [
     "log",
     "debug",
@@ -117,4 +118,5 @@ app
   .use(LibGenerateTestUserSig)
   .use(TRTC)
   .use(RoomFormat)
+  .use(IconPath)
   .mount("#app");

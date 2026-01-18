@@ -96,12 +96,34 @@ export class MeetRoomController {
                   }, 200);
                 });
               } else {
-                // 刷新重进：直接获取参会人列表
-                this.fetchParticipants(meetId).then(() => {
-                  const viewIdVideo = `${this.userId.value}_remote_video`;
-                  const viewScreen = `meet-video`;
-                  this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "main", viewIdVideo, 0);
-                  this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "sub", viewScreen, 0);
+                // 刷新重进：先删除旧的参会人记录，然后添加新的参会人记录
+                // 从 localStorage 获取之前保存的 trtcId
+                let oldTrtcId: string | null = null;
+                try {
+                  oldTrtcId = localStorage.getItem(`meet_trtcId_${meetId}`);
+                } catch (error) {
+                  // 静默处理错误
+                }
+
+                // 如果有旧的 trtcId，先删除旧的参会人记录
+                const deleteOldParticipant = oldTrtcId
+                  ? this.removeOutParticipant(meetId, oldTrtcId)
+                  : Promise.resolve();
+
+                // 删除完成后，添加新的参会人记录
+                deleteOldParticipant.then(() => {
+                  // 添加新的参会人记录（即使没有昵称，也使用默认昵称）
+                  this.addOutParticipant(meetId).then(() => {
+                    // 稍微延迟一下，确保后端数据已完全保存
+                    setTimeout(() => {
+                      this.fetchParticipants(meetId).then(() => {
+                        const viewIdVideo = `${this.userId.value}_remote_video`;
+                        const viewScreen = `meet-video`;
+                        this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "main", viewIdVideo, 0);
+                        this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "sub", viewScreen, 0);
+                      });
+                    }, 200);
+                  });
                 });
               }
             } finally {
@@ -498,6 +520,12 @@ export class MeetRoomController {
 
     // 保存 trtcId 以便退出时使用
     this._trtcId.value = trtcId;
+    // 保存到 localStorage，用于刷新时删除旧的参会人记录
+    try {
+      localStorage.setItem(`meet_trtcId_${meetId}`, trtcId);
+    } catch (error) {
+      // 静默处理错误
+    }
 
     // 调用添加外部参会人接口
     return new Promise<void>((resolve, reject) => {
@@ -552,6 +580,14 @@ export class MeetRoomController {
       .then(() => {
         // 删除本地存储，退出会议时清除
         localStorage.removeItem("meeting-status");
+        // 清除保存的 trtcId
+        if (this._meetId.value) {
+          try {
+            localStorage.removeItem(`meet_trtcId_${this._meetId.value}`);
+          } catch (error) {
+            // 静默处理错误
+          }
+        }
 
         // Web端退出会议：返回上一页
         if (this.router) {
@@ -627,9 +663,49 @@ export class MeetRoomController {
     // 删除本地存储
     try {
       localStorage.removeItem("meeting-status");
+      // 清除保存的 trtcId
+      if (this._meetId.value) {
+        localStorage.removeItem(`meet_trtcId_${this._meetId.value}`);
+      }
     } catch (error) {
       // 静默处理错误
     }
+  }
+
+  /**
+   * 执行刷新流程（用于页面刷新前）
+   * 只删除参会人，不退出 TRTC 房间（因为页面会重新加载）
+   */
+  public handlePageRefresh() {
+    // 删除外部参会人（使用 fetch keepalive 确保请求能发送）
+    if (this._meetId.value && this._trtcId.value) {
+      try {
+        const urlConfig = (window as any).$config?.urls?.meetRemoveOutParticipant;
+        if (urlConfig) {
+          const baseURL = import.meta.env.VITE_API_BASE_URL || "";
+          const url = `${baseURL}/${urlConfig.path.join("/")}`;
+          // 使用 fetch 的 keepalive 选项，确保请求在页面刷新后也能发送
+          fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              meetId: this._meetId.value,
+              trtcId: this._trtcId.value,
+            }),
+            keepalive: true, // 关键：即使页面刷新也会发送请求
+          }).catch(() => {
+            // 静默处理错误
+          });
+        }
+      } catch (error) {
+        // 静默处理错误
+      }
+    }
+
+    // 注意：刷新时不退出 TRTC 房间，因为页面会重新加载，TRTC 会自动断开
+    // 也不删除 localStorage，因为需要在刷新后读取旧的 trtcId
   }
 
   /**

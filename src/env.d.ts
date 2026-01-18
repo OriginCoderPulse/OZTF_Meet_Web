@@ -39,7 +39,7 @@ declare module "motion-v" {
 
 // 扩展 Vue 组件类型，使其可以在 JSX 中使用
 declare module "vue" {
-  interface ComponentCustomProperties {}
+  interface ComponentCustomProperties { }
   interface GlobalComponents {
     [key: string]: Component;
   }
@@ -126,7 +126,28 @@ declare global {
   var $config: {
     urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
   };
-
+  var MEET_ROOM_SHOW_PARTICIPANT_ARROW: string[];
+  var MEET_ROOM_CAMERA_OFF_PLACEHOLDER: string[];
+  var MEET_ROOM_NETWORK_STATE: string[];
+  var MEET_ROOM_MICROPHONE_ON: string[];
+  var MEET_ROOM_MICROPHONE_OFF: string[];
+  var MEET_ROOM_CAMERA_ON: string[];
+  var MEET_ROOM_CAMERA_OFF: string[];
+  var MEET_ROOM_COPY_MEET_INFO: string[];
+  var MEET_ROOM_SCREEN_SHARE_STOP: string[];
+  var MEET_ROOM_SCREEN_SHARE_START: string[];
+  var MEET_ROOM_ADD_PARTICIPANT: string[];
+  var MEET_ROOM_EXIT_MEETING: string[];
+  var MEET_COPY_MEETING_INFO: string[];
+  var VIDEO_HISTORY: string[];
+  var VIDEO_BIG_SCREEN: string[];
+  var HISTORY_VIDEO_FOLD: string[];
+  var HISTORY_VIDEO_EXPORT: string[];
+  var STAFF_DETAIL_CLOSE_PDF: string[];
+  var PROJECT_FEATURE_DETAIL_BTN: string[];
+  var PROJECT_BUG_DETAIL_BTN: string[];
+  var PROJECT_ADD: string[];
+  var NFC_WAITING: string[];
   interface Window {
     $storage: {
       get: (key: string) => Promise<string>;
@@ -203,7 +224,24 @@ declare global {
     $config: {
       urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
     };
+    MEET_ROOM_SHOW_PARTICIPANT_ARROW: string[];
+    MEET_ROOM_CAMERA_OFF_PLACEHOLDER: string[];
+    MEET_ROOM_NETWORK_STATE: string[];
+    MEET_ROOM_MICROPHONE_ON: string[];
+    MEET_ROOM_MICROPHONE_OFF: string[];
+    MEET_ROOM_CAMERA_ON: string[];
+    MEET_ROOM_CAMERA_OFF: string[];
+    MEET_ROOM_COPY_MEET_INFO: string[];
+    MEET_ROOM_SCREEN_SHARE_STOP: string[];
+    MEET_ROOM_SCREEN_SHARE_START: string[];
+    MEET_ROOM_ADD_PARTICIPANT: string[];
+    MEET_ROOM_EXIT_MEETING: string[];
+    MEET_COPY_MEETING_INFO: string[];
+    VIDEO_HISTORY: string[];
+    VIDEO_BIG_SCREEN: string[];
+    HISTORY_VIDEO_FOLD: string[];
+    HISTORY_VIDEO_EXPORT: string[];
   }
 }
 
-export {};
+export { };

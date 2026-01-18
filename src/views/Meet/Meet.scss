@@ -151,6 +151,10 @@
             font-size: 12px;
             z-index: 10;
             pointer-events: none;
+            max-width: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
 
           &:last-child {

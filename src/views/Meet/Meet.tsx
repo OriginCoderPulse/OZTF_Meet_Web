@@ -6,7 +6,6 @@ import { Motion } from "motion-v";
 import Svg from "@/components/Svg/Svg.tsx";
 import { MeetRoomController } from "./Meet.controller.ts";
 import { useRoute, useRouter } from "vue-router";
-import { meetRoomConfig } from "./Meet.config.ts";
 
 export default defineComponent({
   name: "MeetRoom",
@@ -19,63 +18,9 @@ export default defineComponent({
     controller.setRouter(router);
     let meetId: string = "";
 
-    // 使用 sessionStorage 来区分刷新和关闭（更可靠）
-    const REFRESH_FLAG_KEY = "meet_is_refreshing";
-
-    // 监听页面显示事件，检测是否是刷新后的恢复
-    const handlePageShow = (event: PageTransitionEvent) => {
-      // 如果是从缓存恢复（刷新），清除标志
-      if (event.persisted) {
-        try {
-          sessionStorage.removeItem(REFRESH_FLAG_KEY);
-        } catch (error) {
-          // 静默处理错误
-        }
-      }
-    };
-
-    // 监听按键事件，检测刷新快捷键
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // F5 或 Ctrl+R / Cmd+R 表示刷新
-      if (event.key === "F5" || (event.key === "r" && (event.ctrlKey || event.metaKey))) {
-        // 在 sessionStorage 中设置刷新标志
-        try {
-          sessionStorage.setItem(REFRESH_FLAG_KEY, "true");
-        } catch (error) {
-          // 静默处理错误
-        }
-      }
-    };
-
     // 页面关闭前执行退出流程
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      // 检查是否是刷新（通过 sessionStorage）
-      let isRefreshing = false;
-      try {
-        isRefreshing = sessionStorage.getItem(REFRESH_FLAG_KEY) === "true";
-      } catch (error) {
-        // 静默处理错误
-      }
-
-      if (!isRefreshing) {
-        // 不是刷新：执行完整的退出流程（删除参会人 + 退出 TRTC 房间）
-        controller.handlePageUnload();
-        // 显示确认对话框（只允许离开页面）
-        // 注意：现代浏览器会显示自己的确认对话框，无法自定义按钮文本
-        event.preventDefault();
-        event.returnValue = "";
-      } else {
-        // 如果是刷新：只删除参会人，不退出 TRTC 房间（因为页面会重新加载）
-        controller.handlePageRefresh();
-        // 刷新时不显示弹框，直接允许刷新
-        // 不调用 preventDefault()，这样就不会显示确认对话框
-        // 清除刷新标志
-        try {
-          sessionStorage.removeItem(REFRESH_FLAG_KEY);
-        } catch (error) {
-          // 静默处理错误
-        }
-      }
+    const handleBeforeUnload = () => {
+      controller.handlePageUnload();
     };
 
     onMounted(() => {
@@ -92,21 +37,15 @@ export default defineComponent({
         }
       }
 
-      // 监听页面显示事件（用于检测刷新）
-      window.addEventListener("pageshow", handlePageShow);
-      // 监听按键事件（用于检测刷新快捷键）
-      window.addEventListener("keydown", handleKeyDown);
       // 监听页面关闭事件
       window.addEventListener("beforeunload", handleBeforeUnload);
     });
 
     onUnmounted(() => {
-      // 移除所有事件监听
-      window.removeEventListener("pageshow", handlePageShow);
-      window.removeEventListener("keydown", handleKeyDown);
+      // 移除事件监听
       window.removeEventListener("beforeunload", handleBeforeUnload);
 
-      // 组件卸载时，尝试删除内部参与人
+      // 组件卸载时，尝试删除外部参会人
       if (meetId) {
         controller.cleanup(meetId).catch(() => { });
       }
@@ -201,25 +140,6 @@ export default defineComponent({
           </div>
           <div class="meet-operator">
             <div class="operator-list">
-              <div class="operator-item">
-                <Svg
-                  svgPath={MEET_ROOM_NETWORK_STATE}
-                  width="20"
-                  height="20"
-                  class="icon"
-                  fill={
-                    meetRoomConfig.networkState[controller.networkState.value as keyof NetworkState]
-                      .color
-                  }
-                />
-                <span class="tooltip">
-                  网络状态：
-                  {
-                    meetRoomConfig.networkState[controller.networkState.value as keyof NetworkState]
-                      .status
-                  }
-                </span>
-              </div>
               <div
                 class={["operator-item", { disabled: !controller.canOpenMicrophone.value }]}
                 onClick={() => {

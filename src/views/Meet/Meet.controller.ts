@@ -26,6 +26,7 @@ export class MeetRoomController {
   public networkState = ref("unknown");
   public participantNickname = ref<string>("");
   public loading = ref(true); // 加载状态：创建外部参会人和获取参会人列表期间显示加载动画
+  private canShowParticipant = ref(true);
   private _roomId = ref<number>(0);
   private _meetId = ref<string>("");
   private _trtcId = ref<string>(""); // 当前用户的 TRTC ID
@@ -79,62 +80,22 @@ export class MeetRoomController {
           .joinRoom(roomId)
           .then(async () => {
             try {
-              // 检查是否有昵称（从 InfoPage 传递的），如果有则添加外部参会人
-              const hasNickname = !!(window as any).__tempNickname;
-
-              if (hasNickname) {
-                // 首次进入：添加外部参会人
-                this.addOutParticipant(meetId).then(() => {
-                  // 稍微延迟一下，确保后端数据已完全保存
-                  setTimeout(() => {
-                    this.fetchParticipants(meetId).then(() => {
-                      const viewIdVideo = `${this.userId.value}_remote_video`;
-                      const viewScreen = `meet-video`;
-                      this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "main", viewIdVideo, 0);
-                      this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "sub", viewScreen, 0);
-                    });
-                  }, 200);
-                });
-              } else {
-                // 刷新重进：先删除旧的参会人记录，然后添加新的参会人记录
-                // 从 localStorage 获取之前保存的 trtcId
-                let oldTrtcId: string | null = null;
-                try {
-                  oldTrtcId = localStorage.getItem(`meet_trtcId_${meetId}`);
-                } catch (error) {
-                  // 静默处理错误
-                }
-
-                // 如果有旧的 trtcId，先删除旧的参会人记录
-                const deleteOldParticipant = oldTrtcId
-                  ? this.removeOutParticipant(meetId, oldTrtcId)
-                  : Promise.resolve();
-
-                // 删除完成后，添加新的参会人记录
-                deleteOldParticipant.then(() => {
-                  // 添加新的参会人记录（即使没有昵称，也使用默认昵称）
-                  this.addOutParticipant(meetId).then(() => {
-                    // 稍微延迟一下，确保后端数据已完全保存
-                    setTimeout(() => {
-                      this.fetchParticipants(meetId).then(() => {
-                        const viewIdVideo = `${this.userId.value}_remote_video`;
-                        const viewScreen = `meet-video`;
-                        this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "main", viewIdVideo, 0);
-                        this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "sub", viewScreen, 0);
-                      });
-                    }, 200);
+              // 添加外部参会人
+              this.addOutParticipant(meetId).then(() => {
+                // 稍微延迟一下，确保后端数据已完全保存
+                setTimeout(() => {
+                  this.fetchParticipants(meetId).then(() => {
+                    const viewIdVideo = `${this.userId.value}_remote_video`;
+                    const viewScreen = `meet-video`;
+                    this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "main", viewIdVideo, 0);
+                    this.startRemoteVideoWithRetry(this._roomId.value, this.userId.value, "sub", viewScreen, 0);
                   });
-                });
-              }
+                }, 200);
+              });
             } finally {
               // 完成后关闭加载状态
               this.loading.value = false;
             }
-
-            // Web端：TRTC userId 就是 trtcId
-            // 对于其他参与人，在 REMOTE_USER_ENTER 事件中建立映射
-
-            $trtc.listenRoomProperties(roomId, TRTCSDK.EVENT.NETWORK_QUALITY, () => { });
 
             // 监听远端音频可用事件 - 当远端用户发布音频时触发
             $trtc.listenRoomProperties(roomId, TRTCSDK.EVENT.REMOTE_AUDIO_AVAILABLE, (event) => {
@@ -381,20 +342,9 @@ export class MeetRoomController {
                 ...(data.outParticipants || []),
               ];
 
-              // 过滤掉自己（使用 trtcId 匹配）
-              const filteredParticipants = allParticipants.filter((participant) => {
-                return participant.trtcId !== this.userId.value;
-              });
-
-              // 确保每个参会人都有 name 字段，如果没有则使用默认值
-              const participantsWithName = filteredParticipants.map((p) => ({
-                ...p,
-                name: p.name || "Web用户",
-              }));
-
               // 确保使用新的数组引用，触发响应式更新
-              this.participantList.value = [...participantsWithName];
-              this.showParticipant.value = filteredParticipants.length > 0;
+              this.participantList.value = [...allParticipants.filter(item => item.trtcId !== this.userId.value)];
+              if (this.canShowParticipant.value) this.showParticipant.value = allParticipants.filter(item => item.trtcId !== this.userId.value).length > 0;
 
               resolve(allParticipants);
             } catch (error: any) {
@@ -415,6 +365,11 @@ export class MeetRoomController {
    * 切换参与者显示
    */
   public toggleParticipant() {
+    if (this.showParticipant.value) {
+      this.canShowParticipant.value = false;
+    } else {
+      this.canShowParticipant.value = true;
+    }
     this.showParticipant.value = !this.showParticipant.value;
   }
 
@@ -670,42 +625,6 @@ export class MeetRoomController {
     } catch (error) {
       // 静默处理错误
     }
-  }
-
-  /**
-   * 执行刷新流程（用于页面刷新前）
-   * 只删除参会人，不退出 TRTC 房间（因为页面会重新加载）
-   */
-  public handlePageRefresh() {
-    // 删除外部参会人（使用 fetch keepalive 确保请求能发送）
-    if (this._meetId.value && this._trtcId.value) {
-      try {
-        const urlConfig = (window as any).$config?.urls?.meetRemoveOutParticipant;
-        if (urlConfig) {
-          const baseURL = import.meta.env.VITE_API_BASE_URL || "";
-          const url = `${baseURL}/${urlConfig.path.join("/")}`;
-          // 使用 fetch 的 keepalive 选项，确保请求在页面刷新后也能发送
-          fetch(url, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              meetId: this._meetId.value,
-              trtcId: this._trtcId.value,
-            }),
-            keepalive: true, // 关键：即使页面刷新也会发送请求
-          }).catch(() => {
-            // 静默处理错误
-          });
-        }
-      } catch (error) {
-        // 静默处理错误
-      }
-    }
-
-    // 注意：刷新时不退出 TRTC 房间，因为页面会重新加载，TRTC 会自动断开
-    // 也不删除 localStorage，因为需要在刷新后读取旧的 trtcId
   }
 
   /**

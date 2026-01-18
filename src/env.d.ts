@@ -128,7 +128,6 @@ declare global {
   };
   var MEET_ROOM_SHOW_PARTICIPANT_ARROW: string[];
   var MEET_ROOM_CAMERA_OFF_PLACEHOLDER: string[];
-  var MEET_ROOM_NETWORK_STATE: string[];
   var MEET_ROOM_MICROPHONE_ON: string[];
   var MEET_ROOM_MICROPHONE_OFF: string[];
   var MEET_ROOM_CAMERA_ON: string[];
@@ -226,7 +225,6 @@ declare global {
     };
     MEET_ROOM_SHOW_PARTICIPANT_ARROW: string[];
     MEET_ROOM_CAMERA_OFF_PLACEHOLDER: string[];
-    MEET_ROOM_NETWORK_STATE: string[];
     MEET_ROOM_MICROPHONE_ON: string[];
     MEET_ROOM_MICROPHONE_OFF: string[];
     MEET_ROOM_CAMERA_ON: string[];

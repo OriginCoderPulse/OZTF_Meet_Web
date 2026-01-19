@@ -112,13 +112,6 @@ declare global {
       callback: (event: any, room: any) => void
     ) => void;
   };
-  var $libGenerateTestUserSig: {
-    genTestUserSig: (
-      sdkAppId: number,
-      userId: string,
-      sdkSecretKey: string
-    ) => { sdkAppId: number; userSig: string };
-  };
   var $roomformat: {
     roomIdToNumber: (roomId: string | number) => number;
     numberToRoomId: (numericRoomId: number) => string;
@@ -214,13 +207,6 @@ declare global {
         event: string,
         callback: (event: any, room: any) => void
       ) => void;
-    };
-    $libGenerateTestUserSig: {
-      genTestUserSig: (
-        sdkAppId: number,
-        userId: string,
-        sdkSecretKey: string
-      ) => { sdkAppId: number; userSig: string };
     };
     $roomformat: {
       roomIdToNumber: (roomId: string | number) => number;

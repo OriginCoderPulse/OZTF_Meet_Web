@@ -138,7 +138,6 @@ OZTF_Meet_Web/
 │   │   ├── Popup.ts        # 弹窗工具
 │   │   └── Meet/           # 会议相关工具
 │   │       ├── TRTC.ts     # TRTC SDK 封装
-│   │       ├── LibGenerateTestUserSig.ts  # UserSig 生成
 │   │       ├── RoomFormat.ts  # 房间ID格式化
 │   │       └── IdGenerator.ts # ID 生成器
 │   ├── router/             # 路由配置

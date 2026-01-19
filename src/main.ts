@@ -9,6 +9,7 @@ import Storage from "./utils/Storage";
 import TRTC from "./utils/Meet/TRTC";
 import RoomFormat from "./utils/Meet/RoomFormat";
 import IconPath from "./utils/IconPath";
+import VLoading from "./Scripts/VLoading.ts";
 
 // 根据环境变量控制是否允许打开控制台
 // 如果 VITE_INSPECTOR 不为 'true'，则禁用控制台（生产环境和开发环境都生效）
@@ -119,4 +120,5 @@ app
   .use(TRTC)
   .use(RoomFormat)
   .use(IconPath)
+  .directive("loading", VLoading)
   .mount("#app");

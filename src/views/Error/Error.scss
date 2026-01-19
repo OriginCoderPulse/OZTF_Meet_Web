@@ -15,7 +15,12 @@
     padding: 40px;
     background-color: rgba(37, 37, 37, 0.49);
     border-radius: 18px;
-    max-width: 500px;
+    width: 500px;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 
     .error-icon {
       font-size: 64px;

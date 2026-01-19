@@ -1,6 +1,6 @@
 /// <reference path="./InfoPage.d.ts" />
 
-import { defineComponent, onMounted, onUnmounted } from "vue";
+import { defineComponent, onMounted, onUnmounted, Fragment } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import "./InfoPage.scss";
 import { InfoPageController } from "./InfoPage.controller.ts";
@@ -28,166 +28,148 @@ export default defineComponent({
     return () => {
       const { meetingInfo, loading, joining, isMobile, nickname, error } = controller;
 
-      // 加载中或正在加入会议
-      if (loading.value || joining.value) {
-        return (
-          <div class="info-page">
-            <div class="info-loading">
-              <div class="spinner-container">
-                <div class="spinner">
-                  <div class="spinner">
-                    <div class="spinner">
-                      <div class="spinner">
-                        <div class="spinner">
-                          <div class="spinner"></div>
-                        </div>
-                      </div>
-                    </div>
+      return (
+        <div
+          class={`info-page ${!loading.value && !joining.value && meetingInfo.value && isMobile.value ? 'info-page-mobile' : ''} ${!loading.value && !joining.value && (!meetingInfo.value || !isMobile.value) ? 'info-page-pc' : ''}`}
+          v-loading={loading.value || joining.value}
+        >
+          {!loading.value && !joining.value && (
+            <>
+              {/* 会议信息不存在或已取消/已结束（应该已经弹出提示并退出） */}
+              {!meetingInfo.value && (
+                <div class="info-container-pc">
+                  <h1 class="info-title-pc">会议室信息</h1>
+                  <div class="info-error-container">
+                    <div class="error-icon">⚠️</div>
+                    <div class="error-text">{error.value || "会议不存在"}</div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      // 会议信息不存在或已取消/已结束（应该已经弹出提示并退出）
-      if (!meetingInfo.value) {
-        return (
-          <div class="info-page info-page-pc">
-            <div class="info-container-pc">
-              <h1 class="info-title-pc">会议室信息</h1>
-              <div class="info-error-container">
-                <div class="error-icon">⚠️</div>
-                <div class="error-text">{error.value || "会议不存在"}</div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      const meeting = meetingInfo.value;
-      const isPending = meeting.status === "Pending";
-      const isInProgress = meeting.status === "InProgress";
-
-      // 移动端显示
-      if (isMobile.value) {
-        return (
-          <div class="info-page info-page-mobile">
-            <div class="info-container-mobile">
-              <h1 class="info-title-mobile">会议室信息</h1>
-
-              {meeting.topic && (
-                <div class="info-item-mobile">
-                  <span class="info-label-mobile">会议主题：</span>
-                  <span class="info-value-mobile">{meeting.topic}</span>
-                </div>
               )}
 
-              <div class="info-item-mobile">
-                <span class="info-label-mobile">会议ID：</span>
-                <span class="info-value-mobile">{roomId}</span>
-              </div>
+              {meetingInfo.value && (() => {
+                const meeting = meetingInfo.value;
+                const isPending = meeting.status === "Pending";
+                const isInProgress = meeting.status === "InProgress";
 
-              {meeting.description && (
-                <div class="info-item-mobile">
-                  <span class="info-label-mobile">会议说明：</span>
-                  <span class="info-value-mobile description-value">{meeting.description}</span>
-                </div>
-              )}
+                // 移动端显示
+                if (isMobile.value) {
+                  return (
+                    <div class="info-container-mobile">
+                      <h1 class="info-title-mobile">会议室信息</h1>
 
-              <div class="info-item-mobile info-item-last">
-                <span class="info-label-mobile">会议状态：</span>
-                <span class={`info-value-mobile info-status-${meeting.status.toLowerCase()}`}>
-                  {infoPageConfig.statusMessages[meeting.status]}
-                </span>
-              </div>
+                      {meeting.topic && (
+                        <div class="info-item-mobile">
+                          <span class="info-label-mobile">会议主题：</span>
+                          <span class="info-value-mobile">{meeting.topic}</span>
+                        </div>
+                      )}
 
-              <div class="info-mobile-warning">
-                <div class="warning-icon">📱</div>
-                <div class="warning-text">请在PC端加入会议</div>
-                <div class="warning-desc">移动端暂不支持加入会议，请使用电脑浏览器访问</div>
-              </div>
-            </div>
-          </div>
-        );
-      }
+                      <div class="info-item-mobile">
+                        <span class="info-label-mobile">会议ID：</span>
+                        <span class="info-value-mobile">{roomId}</span>
+                      </div>
 
-      // PC端显示
-      return (
-        <div class="info-page info-page-pc">
-          <div class="info-container-pc">
-            <h1 class="info-title-pc">会议室信息</h1>
+                      {meeting.description && (
+                        <div class="info-item-mobile">
+                          <span class="info-label-mobile">会议说明：</span>
+                          <span class="info-value-mobile description-value">{meeting.description}</span>
+                        </div>
+                      )}
 
-            {meeting.topic && (
-              <div class="info-item-pc">
-                <span class="info-label-pc">会议主题：</span>
-                <span class="info-value-pc">{meeting.topic}</span>
-              </div>
-            )}
+                      <div class="info-item-mobile info-item-last">
+                        <span class="info-label-mobile">会议状态：</span>
+                        <span class={`info-value-mobile info-status-${meeting.status.toLowerCase()}`}>
+                          {infoPageConfig.statusMessages[meeting.status]}
+                        </span>
+                      </div>
 
-            <div class="info-item-pc">
-              <span class="info-label-pc">会议ID：</span>
-              <span class="info-value-pc">{roomId}</span>
-            </div>
+                      <div class="info-mobile-warning">
+                        <div class="warning-icon">📱</div>
+                        <div class="warning-text">请在PC端加入会议</div>
+                        <div class="warning-desc">移动端暂不支持加入会议，请使用电脑浏览器访问</div>
+                      </div>
+                    </div>
+                  );
+                }
 
-            {meeting.description && (
-              <div class="info-item-pc">
-                <span class="info-label-pc">会议说明：</span>
-                <span class="info-value-pc description-value">{meeting.description}</span>
-              </div>
-            )}
+                // PC端显示
+                return (
+                  <div class="info-container-pc">
+                    <h1 class="info-title-pc">会议室信息</h1>
 
-            <div class="info-item-pc info-item-last">
-              <span class="info-label-pc">会议状态：</span>
-              <span class={`info-value-pc info-status-${meeting.status.toLowerCase()}`}>
-                {infoPageConfig.statusMessages[meeting.status]}
-              </span>
-            </div>
+                    {meeting.topic && (
+                      <div class="info-item-pc">
+                        <span class="info-label-pc">会议主题：</span>
+                        <span class="info-value-pc">{meeting.topic}</span>
+                      </div>
+                    )}
 
-            {/* 会议未开始，只显示基本信息，不显示输入框和加入按钮 */}
-            {isPending ? (
-              <div class="info-pending-notice">
-                <div class="notice-icon">⏰</div>
-                <div class="notice-text">会议尚未开始，请等待会议开始后再加入</div>
-              </div>
-            ) : isInProgress ? (
-              /* 会议进行中，显示输入框和加入按钮 */
-              <div class="info-form-pc">
-                <div class="form-item-pc">
-                  <label class="form-label-pc">请输入您的昵称</label>
-                  <input
-                    class="form-input-pc"
-                    type="text"
-                    placeholder="请输入昵称"
-                    value={nickname.value}
-                    onInput={(e: any) => {
-                      nickname.value = e.target.value;
-                      error.value = "";
-                    }}
-                    onKeyup={(e: KeyboardEvent) => {
-                      if (e.key === "Enter") {
-                        controller.handleJoin(roomId);
-                      }
-                    }}
-                  />
-                  {error.value && <div class="form-error-pc">{error.value}</div>}
-                </div>
-                <button class="join-button-pc" onClick={() => controller.handleJoin(roomId)}>
-                  进入会议室
-                </button>
-              </div>
-            ) : null}
+                    <div class="info-item-pc">
+                      <span class="info-label-pc">会议ID：</span>
+                      <span class="info-value-pc">{roomId}</span>
+                    </div>
 
-            {/* 退出会议按钮 - 只在非进行中状态显示 */}
-            {!isInProgress && (
-              <div class="info-exit-button-container">
-                <button class="exit-button-pc" onClick={() => controller.handleExit()}>
-                  退出
-                </button>
-              </div>
-            )}
-          </div>
+                    {meeting.description && (
+                      <div class="info-item-pc">
+                        <span class="info-label-pc">会议说明：</span>
+                        <span class="info-value-pc description-value">{meeting.description}</span>
+                      </div>
+                    )}
+
+                    <div class="info-item-pc info-item-last">
+                      <span class="info-label-pc">会议状态：</span>
+                      <span class={`info-value-pc info-status-${meeting.status.toLowerCase()}`}>
+                        {infoPageConfig.statusMessages[meeting.status]}
+                      </span>
+                    </div>
+
+                    {/* 会议未开始，只显示基本信息，不显示输入框和加入按钮 */}
+                    {isPending ? (
+                      <div class="info-pending-notice">
+                        <div class="notice-icon">⏰</div>
+                        <div class="notice-text">会议尚未开始，请等待会议开始后再加入</div>
+                      </div>
+                    ) : isInProgress ? (
+                      /* 会议进行中，显示输入框和加入按钮 */
+                      <div class="info-form-pc">
+                        <div class="form-item-pc">
+                          <label class="form-label-pc">请输入您的昵称</label>
+                          <input
+                            class="form-input-pc"
+                            type="text"
+                            placeholder="请输入昵称"
+                            value={nickname.value}
+                            onInput={(e: any) => {
+                              nickname.value = e.target.value;
+                              error.value = "";
+                            }}
+                            onKeyup={(e: KeyboardEvent) => {
+                              if (e.key === "Enter") {
+                                controller.handleJoin(roomId);
+                              }
+                            }}
+                          />
+                          {error.value && <div class="form-error-pc">{error.value}</div>}
+                        </div>
+                        <button class="join-button-pc" onClick={() => controller.handleJoin(roomId)}>
+                          进入会议室
+                        </button>
+                      </div>
+                    ) : null}
+
+                    {/* 退出会议按钮 - 只在非进行中状态显示 */}
+                    {!isInProgress && (
+                      <div class="info-exit-button-container">
+                        <button class="exit-button-pc" onClick={() => controller.handleExit()}>
+                          退出
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </>
+          )}
         </div>
       );
     };

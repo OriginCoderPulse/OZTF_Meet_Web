@@ -7,6 +7,10 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: "/",
+      component: Error, // 根路由直接显示错误页面
+    },
+    {
       path: "/:roomId",
       name: "InfoPage",
       component: InfoPage,
@@ -36,6 +40,17 @@ const router = createRouter({
       path: "/error",
       name: "Error",
       component: Error,
+      beforeEnter: (_to, from, next) => {
+        // 只允许从会议室页面或会议信息页面跳转过来
+        // 如果直接通过 URL 访问，重定向到根路由
+        if (from.name === "MeetRoom" || from.name === "InfoPage") {
+          // 从会议室或信息页面跳转过来，允许访问
+          next();
+        } else {
+          // 直接通过 URL 访问，重定向到根路由
+          next("/");
+        }
+      },
     },
   ],
 });

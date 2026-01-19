@@ -51,32 +51,8 @@ export default defineComponent({
       }
     });
 
-    return () => {
-      // 加载中时显示加载动画
-      if (controller.loading.value) {
-        return (
-          <div class="meet-room">
-            <div class="meet-loading">
-              <div class="spinner-container">
-                <div class="spinner">
-                  <div class="spinner">
-                    <div class="spinner">
-                      <div class="spinner">
-                        <div class="spinner">
-                          <div class="spinner"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      return (
-        <div class="meet-room">
+    return () => (
+      <div class="meet-room" v-loading={controller.loading.value}>
           <div class="meet-main">
             <div id="meet-video" class="meet-video">
               <div class="show-participant" onClick={() => controller.toggleParticipant()}>
@@ -318,6 +294,5 @@ export default defineComponent({
           </div>
         </div>
       );
-    };
   },
 });

@@ -4,6 +4,7 @@ import { Router } from "vue-router";
 export class InfoPageController {
   public meetingInfo = ref<MeetingInfo | null>(null);
   public nickname = ref("");
+  public meetingPassword = ref("");
   public error = ref("");
   public loading = ref(true);
   public joining = ref(false); // 正在加入会议的状态
@@ -118,9 +119,20 @@ export class InfoPageController {
       return;
     }
 
-    // 跳转到会议室页面，昵称通过全局变量传递（临时方案，因为不能使用路由参数和本地存储）
-    // 将昵称保存到 window 对象上，Meet 页面读取后立即清除
+    // 如果会议被加锁，则需要输入会议密码（当前仅前端校验 & 透传，不与后端联动）
+    if (this.meetingInfo.value.locked && !this.meetingPassword.value.trim()) {
+      this.error.value = "请输入会议密码";
+      return;
+    }
+
+    // 跳转到会议室页面，昵称/密码通过全局变量传递（临时方案，因为不能使用路由参数和本地存储）
+    // 将昵称和会议密码保存到 window 对象上，Meet 页面读取后立即清除
     (window as any).__tempNickname = this.nickname.value.trim();
+    if (this.meetingInfo.value.locked) {
+      (window as any).__tempMeetPassword = this.meetingPassword.value.trim();
+    } else {
+      delete (window as any).__tempMeetPassword;
+    }
 
     // 添加本地存储，标记已通过正常流程进入会议室
     try {

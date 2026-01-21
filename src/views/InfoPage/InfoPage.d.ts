@@ -8,6 +8,8 @@ interface MeetingInfo {
   startTime: string;
   duration: number;
   organizerId?: string;
+  /** 是否加锁（是否设置了会议密码） */
+  locked?: boolean;
 }
 
 interface InfoPageConfig {

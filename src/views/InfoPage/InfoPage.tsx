@@ -26,7 +26,7 @@ export default defineComponent({
     });
 
     return () => {
-      const { meetingInfo, loading, joining, isMobile, nickname, error } = controller;
+      const { meetingInfo, loading, joining, isMobile, nickname, meetingPassword, error } = controller;
 
       return (
         <div
@@ -149,8 +149,31 @@ export default defineComponent({
                               }
                             }}
                           />
-                          {error.value && <div class="form-error-pc">{error.value}</div>}
                         </div>
+
+                        {/* 仅在会议被加锁（locked = true）时显示会议密码输入框 */}
+                        {meeting.locked && (
+                          <div class="form-item-pc">
+                            <label class="form-label-pc">请输入会议密码</label>
+                            <input
+                              class="form-input-pc"
+                              type="password"
+                              placeholder="请输入会议密码"
+                              value={meetingPassword.value}
+                              onInput={(e: any) => {
+                                meetingPassword.value = e.target.value;
+                                error.value = "";
+                              }}
+                              onKeyup={(e: KeyboardEvent) => {
+                                if (e.key === "Enter") {
+                                  controller.handleJoin(roomId);
+                                }
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {error.value && <div class="form-error-pc">{error.value}</div>}
                         <button class="join-button-pc" onClick={() => controller.handleJoin(roomId)}>
                           进入会议室
                         </button>

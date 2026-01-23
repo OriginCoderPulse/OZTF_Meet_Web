@@ -2,7 +2,7 @@ import TRTCSDK, { TRTCEventTypes } from "trtc-sdk-v5";
 import { generateRandomId } from "./IdGenerator";
 
 class TRTC {
-  private _sdkAppId: number = Number(import.meta.env.VITE_TRTC_APP_ID);
+  private _sdkAppId: number = 0;
   private _userId: string = "";
   private _userSig: string = "";
   private _rooms: Map<number, TRTCSDK> = new Map();

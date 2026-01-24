@@ -9,6 +9,8 @@ import Storage from "./utils/Storage";
 import TRTC from "./utils/Meet/TRTC";
 import RoomFormat from "./utils/Meet/RoomFormat";
 import IconPath from "./utils/IconPath";
+import EventBus from "./utils/EventBus";
+import WebSocket from "./utils/WebSocket";
 import VLoading from "./Scripts/VLoading.ts";
 
 // 根据环境变量控制是否允许打开控制台
@@ -120,5 +122,7 @@ app
   .use(TRTC)
   .use(RoomFormat)
   .use(IconPath)
+  .use(EventBus)
+  .use(WebSocket)
   .directive("loading", VLoading)
   .mount("#app");

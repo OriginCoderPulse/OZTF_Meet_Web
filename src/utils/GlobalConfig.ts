@@ -1,5 +1,6 @@
 class GlobalConfig {
   appName = "壹零贰肆-外部会议";
+  wsUrl = "https://oztf.site:1024";
   urls = {
     meetAddOutParticipant: {
       method: "POST",
@@ -10,6 +11,12 @@ class GlobalConfig {
     meetGetMeetingByMeetId: {
       method: "POST",
       path: ["meet", "get-meeting-by-meetid"],
+      retry: false,
+      cache: false,
+    },
+    meetVerifyPassword: {
+      method: "POST",
+      path: ["meet", "verify-password"],
       retry: false,
       cache: false,
     },

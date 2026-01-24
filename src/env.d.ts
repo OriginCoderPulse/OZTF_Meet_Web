@@ -123,7 +123,20 @@ declare global {
     clearAll: () => Promise<void>;
   };
   var $config: {
+    appName: string;
+    wsUrl: string;
     urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
+  };
+  var $event: {
+    on: (event: string, callback: (...args: any[]) => any) => void;
+    emit: (event: string, ...args: any[]) => void;
+    off: (event: string, callback?: (...args: any[]) => any) => void;
+  };
+  var $ws: {
+    initMeetWebSocket: () => void;
+    disconnectMeetWebSocket: () => void;
+    getConnectionStatus: () => boolean;
+    destroy: () => void;
   };
   var MEET_ROOM_SHOW_PARTICIPANT_ARROW: string[];
   var MEET_ROOM_CAMERA_OFF_PLACEHOLDER: string[];
@@ -214,6 +227,17 @@ declare global {
     };
     $config: {
       urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
+    };
+    $event: {
+      on: (event: string, callback: (...args: any[]) => any) => void;
+      emit: (event: string, ...args: any[]) => void;
+      off: (event: string, callback?: (...args: any[]) => any) => void;
+    };
+    $ws: {
+      initMeetWebSocket: () => void;
+      disconnectMeetWebSocket: () => void;
+      getConnectionStatus: () => boolean;
+      destroy: () => void;
     };
     MEET_ROOM_SHOW_PARTICIPANT_ARROW: string[];
     MEET_ROOM_CAMERA_OFF_PLACEHOLDER: string[];

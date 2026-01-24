@@ -11,6 +11,8 @@ export class InfoPageController {
   public isMobile = ref(false);
   private router: Router | null = null;
   private windowResizeHandler?: () => void;
+  private currentRoomId: string = "";
+  private meetStatusChangeHandler?: (data: { meetId: string; status: string; oldStatus: string; timestamp: string; type: string }) => void;
 
   /**
    * 设置路由器实例
@@ -23,6 +25,7 @@ export class InfoPageController {
    * 初始化页面
    */
   public async init(roomId: string) {
+    this.currentRoomId = roomId;
     this.loading.value = true;
     // 检测是否为移动端设备
     const ua = navigator.userAgent;
@@ -37,14 +40,30 @@ export class InfoPageController {
     };
     window.addEventListener("resize", this.windowResizeHandler);
 
+    // 监听会议状态变更事件
+    this.meetStatusChangeHandler = (data: { meetId: string; status: string; oldStatus: string; timestamp: string; type: string }) => {
+      // 如果当前页面的会议ID匹配，则重新获取会议信息（静默刷新，不设置loading）
+      if (data.meetId === this.currentRoomId) {
+        this.fetchMeetingInfo(this.currentRoomId, true);
+      }
+    };
+    if (window.$event) {
+      window.$event.on("meetStatusChange", this.meetStatusChangeHandler);
+    }
+
     // 获取会议信息
     await this.fetchMeetingInfo(roomId);
   }
 
   /**
    * 获取会议信息
+   * @param roomId 会议ID
+   * @param silent 是否静默刷新（不设置loading），默认为false
    */
-  private async fetchMeetingInfo(roomId: string) {
+  private async fetchMeetingInfo(roomId: string, silent: boolean = false) {
+    if (!silent) {
+      this.loading.value = true;
+    }
     $network.request(
       "meetGetMeetingByMeetId",
       { meetId: roomId },
@@ -52,9 +71,16 @@ export class InfoPageController {
         const meeting = data;
 
         if (!meeting) {
-          // 会议不存在，只设置错误状态，不弹出alert
-          this.error.value = "该会议不存在";
-          this.loading.value = false;
+          // 会议不存在，显示message弹窗
+          if (!silent) {
+            $message.error({
+              message: "该会议不存在",
+            });
+          }
+          this.error.value = "";
+          if (!silent) {
+            this.loading.value = false;
+          }
           return;
         }
 
@@ -62,9 +88,16 @@ export class InfoPageController {
 
         // 检查会议状态
         if (meeting.status === "Cancelled" || meeting.status === "Concluded") {
-          // 已取消或已结束，只设置错误状态，不弹出alert
-          this.error.value = meeting.status === "Cancelled" ? "该会议已取消" : "该会议已结束";
-          this.loading.value = false;
+          // 已取消或已结束，显示message弹窗
+          if (!silent) {
+            $message.error({
+              message: meeting.status === "Cancelled" ? "该会议已取消" : "该会议已结束",
+            });
+          }
+          this.error.value = "";
+          if (!silent) {
+            this.loading.value = false;
+          }
           return;
         }
 
@@ -78,12 +111,21 @@ export class InfoPageController {
           }
         }
 
-        this.loading.value = false;
+        if (!silent) {
+          this.loading.value = false;
+        }
       },
       () => {
-        // 只设置错误状态，不弹出alert
-        this.error.value = "会议不存在";
-        this.loading.value = false;
+        // 显示message弹窗
+        if (!silent) {
+          $message.error({
+            message: "会议不存在",
+          });
+        }
+        this.error.value = "";
+        if (!silent) {
+          this.loading.value = false;
+        }
       }
     );
   }
@@ -99,40 +141,105 @@ export class InfoPageController {
 
     // 检查会议状态
     if (!this.meetingInfo.value) {
-      this.error.value = "会议信息不存在";
+      $message.error({
+        message: "会议信息不存在",
+      });
+      this.error.value = "";
       return;
     }
 
     if (this.meetingInfo.value.status === "Pending") {
-      this.error.value = "会议尚未开始，无法加入";
+      $message.error({
+        message: "会议尚未开始，无法加入",
+      });
+      this.error.value = "";
       return;
     }
 
     if (this.meetingInfo.value.status !== "InProgress") {
-      this.error.value = "会议状态异常，无法加入";
+      $message.error({
+        message: "会议状态异常，无法加入",
+      });
+      this.error.value = "";
       return;
     }
 
     // 验证昵称
     if (!this.nickname.value.trim()) {
-      this.error.value = "请输入昵称";
+      $message.error({
+        message: "请输入昵称",
+      });
+      this.error.value = "";
       return;
     }
 
-    // 如果会议被加锁，则需要输入会议密码（当前仅前端校验 & 透传，不与后端联动）
-    if (this.meetingInfo.value.locked && !this.meetingPassword.value.trim()) {
-      this.error.value = "请输入会议密码";
+    // 如果会议被加锁，则需要验证会议密码
+    if (this.meetingInfo.value.locked) {
+      if (!this.meetingPassword.value.trim()) {
+        $message.error({
+          message: "请输入会议密码",
+        });
+        this.error.value = "";
+        return;
+      }
+
+      // 验证密码
+      this.joining.value = true;
+      this.error.value = "";
+
+      $network.request(
+        "meetVerifyPassword",
+        {
+          meetId: roomId,
+          password: this.meetingPassword.value.trim(),
+        },
+        async (data: any) => {
+          this.joining.value = false;
+          if (data.valid) {
+            // 密码正确，允许进入
+            // 跳转到会议室页面，昵称/密码通过全局变量传递（临时方案，因为不能使用路由参数和本地存储）
+            // 将昵称和会议密码保存到 window 对象上，Meet 页面读取后立即清除
+            (window as any).__tempNickname = this.nickname.value.trim();
+            (window as any).__tempMeetPassword = this.meetingPassword.value.trim();
+
+            // 添加本地存储，标记已通过正常流程进入会议室
+            try {
+              await $storage.set("meeting-status", "success");
+            } catch (error) {
+              // 静默处理错误
+            }
+
+            if (this.router) {
+              this.router.push({
+                path: `/${roomId}/meet`,
+              });
+            }
+          } else {
+            // 密码错误，显示message弹窗
+            $message.error({
+              message: "会议密码错误，请重新输入",
+            });
+            this.meetingPassword.value = "";
+            this.error.value = ""; // 清空错误文本
+          }
+        },
+        (error: any) => {
+          this.joining.value = false;
+          $message.error({
+            message: error || "验证密码失败，请重试",
+          });
+          this.error.value = ""; // 清空错误文本
+        }
+      );
+
       return;
     }
 
+    // 会议未加锁，直接进入
     // 跳转到会议室页面，昵称/密码通过全局变量传递（临时方案，因为不能使用路由参数和本地存储）
     // 将昵称和会议密码保存到 window 对象上，Meet 页面读取后立即清除
     (window as any).__tempNickname = this.nickname.value.trim();
-    if (this.meetingInfo.value.locked) {
-      (window as any).__tempMeetPassword = this.meetingPassword.value.trim();
-    } else {
-      delete (window as any).__tempMeetPassword;
-    }
+    delete (window as any).__tempMeetPassword;
 
     // 添加本地存储，标记已通过正常流程进入会议室
     try {
@@ -210,6 +317,10 @@ export class InfoPageController {
   public cleanup() {
     if (this.windowResizeHandler) {
       window.removeEventListener("resize", this.windowResizeHandler);
+    }
+    // 移除会议状态变更监听
+    if (this.meetStatusChangeHandler && window.$event) {
+      window.$event.off("meetStatusChange", this.meetStatusChangeHandler);
     }
   }
 }

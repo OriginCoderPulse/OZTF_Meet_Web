@@ -1,5 +1,5 @@
 class GlobalConfig {
-  wsUrl = "http://localhost:1024";
+  wsUrl = "https://oztf.site";
   urls = {
     meetAddOutParticipant: {
       method: "POST",

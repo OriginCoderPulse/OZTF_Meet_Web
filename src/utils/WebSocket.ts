@@ -15,11 +15,14 @@ class WebSocketManager {
      */
     public initMeetWebSocket() {
         if (this.meetSocket) {
+            console.log("[WebSocket] Web端 WebSocket 已连接，跳过重复连接");
             return;
         }
 
-        // 创建 WebSocket 连接
-        this.meetSocket = io(`${this.wsUrl}/meet`, {
+        console.log("[WebSocket] 开始连接Web端 WebSocket...", `${this.wsUrl}/web`);
+
+        // 创建 WebSocket 连接（连接到 /web 命名空间）
+        this.meetSocket = io(`${this.wsUrl}/web`, {
             transports: ["websocket"],
             reconnection: true,
             reconnectionDelay: 1000,
@@ -28,12 +31,13 @@ class WebSocketManager {
 
         this.meetSocket.on("connect", () => {
             this.isConnected = true;
+            console.log("[WebSocket] Web端 WebSocket 连接成功");
             // 订阅会议列表更新
             this.meetSocket?.emit("subscribe");
         });
 
-        this.meetSocket.on("subscribed", () => {
-            // 订阅成功
+        this.meetSocket.on("subscribed", (data: any) => {
+            console.log("[WebSocket] 会议订阅成功:", data);
         });
 
         this.meetSocket.on("meetStatusChange", (data: {
@@ -45,6 +49,7 @@ class WebSocketManager {
             timestamp: string;
             type: string;
         }) => {
+            console.log("[WebSocket] 收到会议状态变更:", data);
             // 通过事件总线下发事件
             // 支持批量变更和单个变更两种格式
             if (data.changes && Array.isArray(data.changes)) {
@@ -64,11 +69,12 @@ class WebSocketManager {
             }
         });
 
-        this.meetSocket.on("error", () => {
-            // WebSocket 错误
+        this.meetSocket.on("error", (error: any) => {
+            console.error("[WebSocket] WebSocket 错误:", error);
         });
 
         this.meetSocket.on("disconnect", () => {
+            console.log("[WebSocket] Web端 WebSocket 连接断开");
             this.isConnected = false;
         });
     }

@@ -1,6 +1,6 @@
 class GlobalConfig {
   appName = "壹零贰肆-外部会议";
-  wsUrl = "ws://oztf.site:1024";
+  wsUrl = "http://localhost:1024";
   urls = {
     meetAddOutParticipant: {
       method: "POST",

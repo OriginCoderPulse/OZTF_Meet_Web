@@ -47,9 +47,7 @@ export class InfoPageController {
         this.fetchMeetingInfo(this.currentRoomId, true);
       }
     };
-    if (window.$event) {
-      window.$event.on("meetStatusChange", this.meetStatusChangeHandler);
-    }
+    $event.on("meetStatusChange", this.meetStatusChangeHandler);
 
     // 获取会议信息
     await this.fetchMeetingInfo(roomId);
@@ -319,8 +317,8 @@ export class InfoPageController {
       window.removeEventListener("resize", this.windowResizeHandler);
     }
     // 移除会议状态变更监听
-    if (this.meetStatusChangeHandler && window.$event) {
-      window.$event.off("meetStatusChange", this.meetStatusChangeHandler);
+    if (this.meetStatusChangeHandler) {
+      $event.off("meetStatusChange", this.meetStatusChangeHandler);
     }
   }
 }

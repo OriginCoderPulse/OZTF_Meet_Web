@@ -1,6 +1,6 @@
 /// <reference path="./InfoPage.d.ts" />
 
-import { defineComponent, onMounted, onUnmounted, Fragment } from "vue";
+import { defineComponent, Fragment, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import "./InfoPage.scss";
 import { InfoPageController } from "./InfoPage.controller.ts";
@@ -34,7 +34,7 @@ export default defineComponent({
           v-loading={loading.value || joining.value}
         >
           {!loading.value && !joining.value && (
-            <>
+            <Fragment>
               {/* 会议信息不存在或已取消/已结束（应该已经弹出提示并退出） */}
               {!meetingInfo.value && (
                 <div class="info-container-pc">
@@ -191,7 +191,7 @@ export default defineComponent({
                   </div>
                 );
               })()}
-            </>
+            </Fragment>
           )}
         </div>
       );

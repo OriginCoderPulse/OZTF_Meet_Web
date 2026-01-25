@@ -7,7 +7,7 @@ declare module "*.vue" {
 }
 
 // JSX 类型定义 - 为 Vue JSX 提供类型支持
-import { VNode, ComponentPublicInstance, Component } from "vue";
+import { Component } from "vue";
 
 declare global {
   namespace JSX {
@@ -123,7 +123,6 @@ declare global {
     clearAll: () => Promise<void>;
   };
   var $config: {
-    appName: string;
     wsUrl: string;
     urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
   };
@@ -226,6 +225,7 @@ declare global {
       numberToRoomId: (numericRoomId: number) => string;
     };
     $config: {
+      wsUrl: string;
       urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
     };
     $event: {

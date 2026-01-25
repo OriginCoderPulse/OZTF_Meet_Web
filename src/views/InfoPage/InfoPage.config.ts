@@ -1,8 +1,4 @@
 export const infoPageConfig: InfoPageConfig = {
-  breakpoints: {
-    mobile: 768,
-    tablet: 1024,
-  },
   statusMessages: {
     Pending: "会议未开始",
     InProgress: "会议进行中",

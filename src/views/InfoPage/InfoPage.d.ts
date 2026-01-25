@@ -13,10 +13,6 @@ interface MeetingInfo {
 }
 
 interface InfoPageConfig {
-  breakpoints: {
-    mobile: number;
-    tablet: number;
-  };
   statusMessages: {
     Pending: string;
     InProgress: string;

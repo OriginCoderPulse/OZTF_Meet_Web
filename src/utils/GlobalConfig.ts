@@ -1,5 +1,4 @@
 class GlobalConfig {
-  appName = "壹零贰肆-外部会议";
   wsUrl = "http://localhost:1024";
   urls = {
     meetAddOutParticipant: {

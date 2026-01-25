@@ -1,1 +1,1 @@
-export const meetRoomConfig: MeetRoomConfig = {};
+export const meetRoomConfig = {};

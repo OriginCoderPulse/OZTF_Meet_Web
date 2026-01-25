@@ -27,16 +27,16 @@ export class InfoPageController {
   public async init(roomId: string) {
     this.currentRoomId = roomId;
     this.loading.value = true;
-    // 检测是否为移动端设备
+    // 检测是否为移动端设备（仅通过 User Agent 判断，不依赖窗口大小）
     const ua = navigator.userAgent;
     const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-    this.isMobile.value = mobileRegex.test(ua) || window.innerWidth <= 768;
+    this.isMobile.value = mobileRegex.test(ua);
 
-    // 监听窗口大小变化
+    // 监听窗口大小变化（仅通过 User Agent 判断，不依赖窗口大小）
     this.windowResizeHandler = () => {
       const ua = navigator.userAgent;
       const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-      this.isMobile.value = mobileRegex.test(ua) || window.innerWidth <= 768;
+      this.isMobile.value = mobileRegex.test(ua);
     };
     window.addEventListener("resize", this.windowResizeHandler);
 

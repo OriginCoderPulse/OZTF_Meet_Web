@@ -2,7 +2,7 @@ class GlobalConfig {
   wsUrl = "https://oztf.site";
   urls = {
     meetAddOutParticipant: {
-      method: "POST",
+      method: "PUT",
       path: ["meet", "add-out-participant"],
       retry: false,
       cache: false,
@@ -26,7 +26,7 @@ class GlobalConfig {
       cache: false,
     },
     meetRemoveOutParticipant: {
-      method: "POST",
+      method: "DELETE",
       path: ["meet", "remove-out-participant"],
       retry: false,
       cache: false,

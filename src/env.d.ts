@@ -123,7 +123,6 @@ declare global {
     clearAll: () => Promise<void>;
   };
   var $config: {
-    wsUrl: string;
     urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
   };
   var $event: {
@@ -225,7 +224,6 @@ declare global {
       numberToRoomId: (numericRoomId: number) => string;
     };
     $config: {
-      wsUrl: string;
       urls: Record<string, { method: string; path: string[]; retry: boolean; cache: boolean }>;
     };
     $event: {

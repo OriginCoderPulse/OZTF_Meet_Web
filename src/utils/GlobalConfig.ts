@@ -1,5 +1,4 @@
 class GlobalConfig {
-  wsUrl = "https://oztf.site";
   urls = {
     meetAddOutParticipant: {
       method: "PUT",

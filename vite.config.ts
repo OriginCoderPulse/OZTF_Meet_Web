@@ -38,5 +38,12 @@ export default defineConfig({
         },
         // 提高 chunk 大小警告限制到 1000 KB
         chunkSizeWarningLimit: 1000,
+        // 生产环境构建时移除 console 和 debugger
+        minify: "esbuild",
+        terserOptions: undefined,
+    },
+    esbuild: {
+        // 只在生产构建时移除 console 和 debugger，开发环境保留
+        drop: process.env.NODE_ENV === "production" ? ["console", "debugger"] : [],
     },
 });

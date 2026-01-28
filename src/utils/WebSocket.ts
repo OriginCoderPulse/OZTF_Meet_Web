@@ -7,16 +7,21 @@ class WebSocketManager {
 
     constructor() {
         // 从环境变量或配置中获取 WebSocket URL
-        this.wsUrl = $config.wsUrl;
+        this.wsUrl = import.meta.env.VITE_WS_URL;
     }
 
     /**
      * 初始化会议 WebSocket 连接
      */
     public initMeetWebSocket() {
+        // 如果已有连接并且仍然处于连接状态，则不重复连接
         if (this.meetSocket) {
-            console.log("[WebSocket] Web端 WebSocket 已连接，跳过重复连接");
-            return;
+            if (this.meetSocket.connected || this.isConnected) {
+                console.log("[WebSocket] Web端 WebSocket 已连接，跳过重复连接");
+                return;
+            }
+            // 存在旧的已断开连接，先销毁再重连
+            this.disconnectMeetWebSocket();
         }
 
         console.log("[WebSocket] 开始连接Web端 WebSocket...", `${this.wsUrl}/web`);
@@ -40,7 +45,8 @@ class WebSocketManager {
             console.log("[WebSocket] 会议订阅成功:", data);
         });
 
-        this.meetSocket.on("meetStatusChange", (data: {
+        this.meetSocket.on("meetStatusChange", (rawData: {
+            messageId?: string;
             changes?: Array<{ meetId: string; status: string; oldStatus: string }>;
             meetId?: string;
             status?: string;
@@ -49,6 +55,22 @@ class WebSocketManager {
             timestamp: string;
             type: string;
         }) => {
+            const { messageId, ...rest } = rawData || {};
+            const data = rest as {
+                changes?: Array<{ meetId: string; status: string; oldStatus: string }>;
+                meetId?: string;
+                status?: string;
+                oldStatus?: string;
+                count?: number;
+                timestamp: string;
+                type: string;
+            };
+
+            // 收到后立即 ack，配合后端实现可靠消息
+            if (messageId) {
+                this.meetSocket?.emit("ack", { messageId });
+            }
+
             console.log("[WebSocket] 收到会议状态变更:", data);
             // 通过事件总线下发事件
             // 支持批量变更和单个变更两种格式

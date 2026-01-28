@@ -126,3 +126,16 @@ app
   .use(WebSocket)
   .directive("loading", VLoading)
   .mount("#app");
+
+// 页面从后台回到前台时，尝试恢复 WebSocket 连接
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      try {
+        // 重新初始化会议 WebSocket；内部会判断当前连接状态
+        (window as any).$ws?.initMeetWebSocket?.();
+      } catch {
+      }
+    }
+  });
+}
